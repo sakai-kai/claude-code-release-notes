@@ -45,11 +45,16 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-07-21 22:23 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-07-22 12:18 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
 <h2>v2.1.217 <span class="badge">NEW</span> <span class="date">2026-07-21</span></h2>
-
+<div class="summary">- 修正: バックグラウンドセッションでシンボリックリンクされた作業ディレクトリが正規化されず、セッションがワークスペースフォルダ外にエスケープできる問題を修正 🔥
+- 修正: 切り詰められたMCPツール出力の完全なデータがメモリに残り続けるメモリリークを修正 🔥
+- 変更: subagentの同時実行数に上限(デフォルト20、`CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`で変更可)を追加し、デフォルトでネストしたsubagent起動を禁止、`--max-budget-usd`到達時にバックグラウンドsubagentの新規起動を拒否・実行中のものも停止するよう変更 🔥
+- 新機能: プロンプト入力に絵文字ショートコード補完(`:heart:`等)を追加、トランスクリプト書き込み失敗やセッション保存無効時に警告を表示するよう改善
+- 修正: Windows自動更新失敗時の`claude.exe`消失、Bedrock版Opus 4.8でauto-compactが発火しない問題、企業のmTLS/TLS検証/OAuthスコープ/プロキシ設定がClaude Desktopで無視される問題、`--resume`時の不正な添付エントリでのTypeErrorなど、多数の細かい不具合を修正
+- 変更: ログイン期限切れ警告の表示タイミングを期限5日前から3日前に変更、フッターのPRバッジリンクをハイパーリンク表示できないターミナルでもクリック可能に改善</div>
 <details><summary>原文リリースノート (20件)</summary><ul><li>Added emoji shortcode autocomplete in the prompt input: type `:heart:` to insert ❤️, or `:hea` for suggestions — disable with the `emojiCompletionEnabled` setting</li>
 <li>Added warnings when transcript writes are failing (e.g. disk full) or when session saving is off due to an inherited environment variable, instead of losing transcripts silently</li>
 <li>Fixed a memory leak where truncated MCP tool outputs kept the full untruncated result in memory for the rest of the session</li>
@@ -73,7 +78,12 @@
 </article>
 <article>
 <h2>v2.1.216 <span class="date">2026-07-21</span></h2>
-
+<div class="summary">- 修正: 長時間セッションでメッセージ正規化のコストがターン数に対して二乗的に増大し、数秒単位の停止や resume の遅延を引き起こしていた問題を修正 🔥
+- 修正: セッション途中で OAuth トークンが失効・ローテーションした際、auto mode が「HTTP 401」エラーを分類してコマンドを拒否してしまう問題を修正
+- 修正: worktree 分離されたサブエージェントが `git -C` や `--git-dir`、`GIT_DIR`/`GIT_WORK_TREE` を介して共有チェックアウトへ git 操作をリダイレクトしてしまう問題を修正 🔥
+- 修正: `.claude` 配下のシンボリックリンクをワークフロー保存やスケジュールタスクの書き込みが辿ってしまい、プロジェクト外への書き込みが発生し得た問題を修正 🔥
+- 修正: @-mention でのファイル添付漏れ、vimのドットリピートやペースト不具合、statusline の二重実行、resume ピッカーのハング、Ctrl+X 二回押しでのセッション削除失敗など、多数の細かい不具合を修正
+- 新機能: フィルタシステム分離を無効化しつつネットワーク egress 制御は維持できる `sandbox.filesystem.disabled` 設定を追加</div>
 <details><summary>原文リリースノート (40件)</summary><ul><li>Added `sandbox.filesystem.disabled` setting to skip filesystem isolation while keeping network egress control</li>
 <li>Fixed a slowdown in long sessions where message normalization cost grew quadratically with the number of turns, causing multi-second stalls and slow resumes</li>
 <li>Fixed auto mode denying commands with &quot;HTTP 401&quot; classifier errors after the OAuth token expired or rotated mid-session</li>
@@ -117,12 +127,17 @@
 </article>
 <article>
 <h2>v2.1.215 <span class="date">2026-07-21</span></h2>
-
+<div class="summary">- 変更: `/verify` と `/code-review` スキルが自動実行されなくなり、必要な場合は `/verify` または `/code-review` を明示的に呼び出す必要がある 🔥</div>
 <details><summary>原文リリースノート (1件)</summary><ul><li>Claude no longer runs the `/verify` and `/code-review` skills on its own; invoke them with `/verify` or `/code-review` when you want them</li></ul></details>
 </article>
 <article>
 <h2>v2.1.214 <span class="date">2026-07-21</span></h2>
-
+<div class="summary">- 修正: Bash/PowerShellの権限チェックにおける複数の抜け穴を修正(`dir/**`ルールが階層を問わず誤承認、1万文字超コマンドの誤判定、zsh比較式の見落とし、`help`/`man`コマンドの誤許可、リダイレクト構文の解析ズレなど)により意図しないコマンドの自動実行を防止 🔥
+- 新機能: 悪質なユーザーやジェイルブレイク試行に対しClaude自身が会話を終了できるEndConversationツールを追加(claude.aiと同様の仕組み) 🔥
+- 新機能: `docker`(Podmanシムを含む)のデーモンリダイレクト系フラグ(`--url`等)使用時に権限確認を要求するよう変更、無許可でのリモート接続実行を防止
+- 修正: バックグラウンドセッション関連の不具合を多数修正(デーモンのソケット誤削除によるプロセス残留、アイドル時のセッション削除不可、Git外フォルダでの削除不可、再開時の会話復元失敗など)
+- 修正: Windows PowerShellツールの不具合を多数修正(標準入力待ちによるハング、非UTF-8/非ASCII入出力でのクラッシュ、UTF-16LEファイル出力、ANSIエスケープ混入など)
+- 修正: その他の細かい不具合をまとめて修正(GrowthBookのnull評価によるクラッシュ、OTelのトレースコンテキスト欠落、メモリfrontmatterの値切り捨て、コスト/トークン計測の二重カウント、hooksのexit code 2が無視される問題など)</div>
 <details><summary>原文リリースノート (47件)</summary><ul><li>Fixed single-segment `dir/**` allow rules like `Edit(src/**)` auto-approving writes to nested `dir/` directories anywhere in the tree instead of only `&lt;cwd&gt;/dir`</li>
 <li>Fixed a permission-check bypass affecting commands run in Windows PowerShell 5.1 sessions</li>
 <li>Fixed Bash permission checks to fail closed on file-descriptor redirect forms that bash parses differently than the permission analyzer</li>
@@ -173,7 +188,12 @@
 </article>
 <article>
 <h2>v2.1.212 <span class="date">2026-07-21</span></h2>
-
+<div class="summary">- 修正: plan mode でファイル変更を伴う Bash コマンド(`touch`、`rm` など)が確認プロンプトなしに自動実行されてしまう問題を修正 🔥
+- 修正: `.claude/worktrees` にコミットされたシンボリックリンクを辿ることで、worktree 作成時にリポジトリ外へファイルが作成され得る問題を修正 🔥
+- 新機能: `/fork` が会話をバックグラウンドセッションとしてコピーするよう変更(旧来のサブエージェント起動は `/subtask` に分離)、WebSearch 呼び出し数やサブエージェント起動数にセッション単位の上限を追加し暴走ループを防止 🔥
+- 新機能: MCP ツール呼び出しが2分を超えると自動的にバックグラウンド実行へ移行、`/resume` で削除済みセッションも含むピッカーから再開可能に、`claude auto-mode reset` を追加
+- 修正: 画像を多数含む会話が誤って &quot;Request too large&quot; になる問題、SIGTERM 時にBashのプロセスツリーが残留する問題、Azure Monitor 等への OTLP エクスポート失敗など多数の細かい不具合を修正
+- 変更: Task tool の `mode` パラメータを廃止しサブエージェントは親セッションの権限モードを継承、Enterprise の `forceLoginMethod` を VS Code拡張・SDK・`setup-token` 等にも適用するよう拡大</div>
 <details><summary>原文リリースノート (48件)</summary><ul><li>`/fork` now copies your conversation into a new background session (its own row in `claude agents`) while you keep working; the in-session subagent it used to launch is now `/subtask`</li>
 <li>Added `claude auto-mode reset` to restore the default auto-mode configuration, with a confirmation prompt (pass `--yes` to skip)</li>
 <li>Added a session-wide limit on WebSearch tool calls (default 200, tunable via `CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION`) to stop runaway search loops</li>
@@ -225,7 +245,12 @@
 </article>
 <article>
 <h2>v2.1.211 <span class="date">2026-07-21</span></h2>
-
+<div class="summary">- 修正: 権限確認プレビューがチャット連携時に双方向オーバーライド文字・ゼロ幅文字・紛らわしい引用符を無害化しておらず、ツール入力で承認メッセージの見た目を偽装できた脆弱性を修正 🔥
+- 修正: auto モードがサンドボックス外 Bash の PreToolUse フックによる `ask` 判定を上書きしていた問題を修正し、フックの `ask` が確認プロンプトを強制するように 🔥
+- 修正: Bedrock/Vertex/Mantle/Foundry で末尾のシステムコンテキストブロックが毎回新規入力トークンとして課金されるプロンプトキャッシュの不具合を修正 🔥
+- 新機能: サブエージェントのテキスト・思考過程を stream-json 出力に含める `--forward-subagent-text` フラグと対応環境変数を追加
+- 変更: 「常に許可」権限ルールの保存先をリポジトリルートに変更し、git worktree 間・セッション間で承認が引き継がれるように
+- 修正: その他多数の細かい修正（スリープ復帰時の同時ログアウト、プラグインMCPサーバーの再接続、サブエージェントのモデル指定の維持、バックグラウンドセッションの再開・再生成周りの不具合など）</div>
 <details><summary>原文リリースノート (37件)</summary><ul><li>Added `--forward-subagent-text` flag and `CLAUDE_CODE_FORWARD_SUBAGENT_TEXT` environment variable to include subagent text and thinking in stream-json output</li>
 <li>Fixed permission previews relayed to chat channels not neutralizing bidirectional-override, zero-width, and look-alike quote characters, so tool inputs cannot visually alter the approval message</li>
 <li>Fixed auto mode overriding a PreToolUse hook&#x27;s `ask` decision for unsandboxed Bash — a hook `ask` now floors the decision at a prompt</li>
@@ -266,7 +291,11 @@
 </article>
 <article>
 <h2>v2.1.210 <span class="date">2026-07-21</span></h2>
-
+<div class="summary">- 修正: `isolation: &#x27;worktree&#x27;` 指定のサブエージェントが、隔離されたワークツリーではなくメインリポジトリに対して直接gitを変更するコマンドを実行できてしまう問題を修正 🔥
+- 修正: `ultracode` キーワードによるオプトインが、webhookペイロードや転送されたPRコメントなど人間由来でない入力でも誤発火する問題を修正し、間接的プロンプトインジェクション対策としてAgentツールを強化 🔥
+- 新機能: 折りたたまれたツール実行サマリーに経過時間カウンターを追加し、長時間実行中のツール呼び出しが停止しているように見えないよう改善
+- 変更: `Write(path)`/`NotebookEdit(path)`/`Glob(path)` 権限ルールに対する起動時警告を追加(`Edit(path)`/`Read(path)`の使用を推奨)し、外部セッションの権限クラシファイアがSonnet 5をデフォルトで使用するよう変更
+- 修正: セッションクラッシュ、`claude attach`のジョブ未検出エラー、バックグラウンドワーカーのクラッシュループ、プラグインMCPサーバーの誤停止、`git worktree lock`の残留など多数の細かい不具合を修正</div>
 <details><summary>原文リリースノート (33件)</summary><ul><li>Added a live elapsed-time counter to the collapsed tool summary line so long-running tool calls visibly tick instead of looking stuck</li>
 <li>Added a startup warning for `Write(path)`, `NotebookEdit(path)`, and `Glob(path)` permission rules — use `Edit(path)` or `Read(path)` instead</li>
 <li>Fixed `isolation: &#x27;worktree&#x27;` subagents being able to run git-mutating commands against the main repo checkout instead of their own isolated worktree</li>
@@ -303,12 +332,17 @@
 </article>
 <article>
 <h2>v2.1.209 <span class="date">2026-07-21</span></h2>
-
+<div class="summary">- 修正: `claude agents` バックグラウンドセッションで `/model` などのダイアログがブロックされていた問題を修正(過度に広範なガードを撤回)</div>
 <details><summary>原文リリースノート (1件)</summary><ul><li>Fixed /model and other dialogs being blocked in `claude agents` background sessions (reverts an overly broad guard)</li></ul></details>
 </article>
 <article>
 <h2>v2.1.208 <span class="date">2026-07-21</span></h2>
-
+<div class="summary">- 新機能: スクリーンリーダーモード(`--ax-screen-reader`)と `vimInsertModeRemaps`(`jj`→Escape等のキー列マッピング)を追加
+- 修正: MCP stdioのstderr蓄積・LSPドキュメント無制限保持・非同期hook出力等、長時間セッションでの複数のメモリリークを解消 🔥
+- 変更: ツールプール構築のキャッシュ化でMCPツール多数時の処理を最大7倍高速化、権限ルールのマッチャーもキャッシュ化して遅延を解消 🔥
+- 修正: AWS SSOプロファイルのsso_regionがBedrockリージョンと異なる場合の認証エラーを修正(2.1.207のリグレッション) 🔥
+- 修正: バックグラウンドセッションのHTTP/2切断時クラッシュ、`claude -p` での大量出力切り捨て、CLI自動更新直後のコンテキスト表示リセットなど、セッション継続性に関わる不具合を修正
+- 修正: Edit/Read/Grep/Globの細かな不具合(一意一致時の失敗、空ファイル誤判定、無効な正規表現の挙動、nullバイトでのクラッシュ等)をまとめて修正</div>
 <details><summary>原文リリースノート (46件)</summary><ul><li>Added screen reader mode: opt-in plain-text rendering for screen reader users. Run `claude --ax-screen-reader`, set CLAUDE_AX_SCREEN_READER=1, or add &quot;axScreenReader&quot;: true to settings.</li>
 <li>Added `vimInsertModeRemaps` setting: map two-key insert-mode sequences like `jj` to Escape in vim mode</li>
 <li>Added `CLAUDE_CODE_PROCESS_WRAPPER`: agent view and the background service now honor a corporate launcher by running every Claude Code self-spawn through a required wrapper executable</li>
@@ -358,7 +392,12 @@
 </article>
 <article>
 <h2>v2.1.207 <span class="date">2026-07-21</span></h2>
-
+<div class="summary">- 新機能: Auto mode が Bedrock/Vertex AI/Foundry でも opt-in なしに標準利用可能に(`disableAutoMode` で無効化可) 🔥
+- 変更: Bedrock/Vertex/Claude Platform on AWS のデフォルトモデルが Claude Opus 4.8 に変更 🔥
+- 修正: 長いリスト・表・コードブロックのストリーミング中にターミナルがフリーズ/キー入力が遅延する不具合を修正 🔥
+- 修正: 非対話実行(`claude -p`、SDK)でリモート管理設定が同意ダイアログを表示せず「同意済み」として永続化されてしまう不具合を修正(セキュリティ関連) 🔥
+- 修正: プラグインの hooks/monitors/MCP headersHelper でシェルコマンド中の `${user_config.*}` を許可していた脆弱性を修正し、シェルインジェクションを防止(exec形式または環境変数経由に変更) 🔥
+- 修正: エージェントチームでのクラッシュループ、Remote Control のタスク状態欠落、worktree 関連設定の残留、bracket パターン起因の読み込み失敗、Bedrock の SSO認証情報再取得の重複、Windows でのAWS認証情報解決時のハング、`/usage-credits` の不正入力の扱いなど、細かな不具合を多数修正</div>
 <details><summary>原文リリースノート (24件)</summary><ul><li>Auto mode is now available without `CLAUDE_CODE_ENABLE_AUTO_MODE` opt-in on Bedrock, Vertex AI, and Foundry; disable via `disableAutoMode` in settings</li>
 <li>Fixed the terminal freezing and keystrokes lagging while streaming responses containing very long lists, tables, paragraphs, or code blocks</li>
 <li>Fixed remote managed settings from a non-interactive run (`claude -p`, the SDK) being permanently recorded as consented without ever showing the security consent dialog</li>
