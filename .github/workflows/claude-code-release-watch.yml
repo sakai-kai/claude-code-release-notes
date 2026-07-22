@@ -1,0 +1,65 @@
+name: Claude Code リリース監視
+
+on:
+  schedule:
+    # JST 6:50 頃と 11:50 頃の1日2回 (cron は UTC 指定)
+    # リリースの9割以上が JST 深夜〜午前に集中しているため、この2回でほぼ当日中に通知できる
+    - cron: "50 21 * * *"
+    - cron: "50 2 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "実行モード (check=通常 / backfill=既存分を日本語要約 / test-notify=通知テスト)"
+        type: choice
+        options:
+          - check
+          - backfill
+          - test-notify
+        default: check
+
+permissions:
+  contents: write
+
+concurrency:
+  group: claude-code-release-watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # すべて任意。設定したものだけが有効になる (リポジトリの Settings > Secrets)
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}  # 日本語要約 (Pro/Max サブスク認証)
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}          # Discord 通知用
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}              # Slack 通知用
+      PAGES_URL: ${{ vars.PAGES_URL }}                                 # 通知に載せるサイト URL (任意)
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # 日本語要約用。トークン未設定ならインストール自体をスキップ。
+      # サプライチェーン対策として最新版ではなく「公開から7日以上経過した最新バージョン」を入れる
+      - name: Install Claude Code CLI (公開7日以上経過の最新版)
+        if: env.CLAUDE_CODE_OAUTH_TOKEN != ''
+        run: |
+          VERSION=$(python3 scripts/pick_cli_version.py)
+          echo "@anthropic-ai/claude-code@${VERSION} をインストールします"
+          npm install -g "@anthropic-ai/claude-code@${VERSION}"
+
+      - name: Check for new releases
+        run: python scripts/check_claude_code_releases.py --mode "${{ inputs.mode || 'check' }}"
+
+      - name: Commit and push updates
+        run: |
+          if [[ -z "$(git status --porcelain state docs)" ]]; then
+            echo "変更なし"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state docs
+          git commit -m "chore: Claude Code リリース情報を更新"
+          git push
