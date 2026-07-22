@@ -83,10 +83,31 @@ def summarize_ja(version: str, notes: list[str]) -> str | None:
     notes_text = "\n".join(f"- {n}" for n in notes)
     prompt = (
         "以下は開発ツール Claude Code の新バージョンのリリースノートです。"
-        "開発者向けに、重要な変更から順に簡潔な日本語の箇条書き(3〜6項目)で要約してください。"
-        "各項目は「新機能:」「修正:」「変更:」のいずれかで始め、影響の大きい変更には末尾に 🔥 を付け、"
-        "細かいバグ修正はまとめて1項目にしてください。"
-        "前置きや結びの文は不要で、箇条書きだけを出力してください。\n\n"
+        "読者は「Claude Code を日常的に使うが、内部実装の専門用語には詳しくない開発者」です。"
+        "絵文字は一切使わず、次のルールと形式で日本語へ整理してください。\n"
+        "\n"
+        "書き方のルール:\n"
+        "- 原文の直訳ではなく「どんな使い方をしていると・何が起きる(起きていた)のか」が伝わる文にする\n"
+        "- 専門用語(例: シンボリックリンク、正規化、ワークスペース、トランスクリプト等)はそのまま使わず、"
+        "平易な言葉に言い換えるか、直後に(=短い説明)を添える\n"
+        "- 【概要】と【重要】で同じ変更に触れるときは、必ず同じ言葉遣いを使う\n"
+        "\n"
+        "形式:\n"
+        "【概要】\n"
+        "このバージョンの要点を60字以内の一文で。\n"
+        "\n"
+        "【重要】\n"
+        "利用者への影響が特に大きい変更だけを「- 」の箇条書きで0〜3件。"
+        "各項目の末尾に「(影響: どんな使い方をしている人か)」を添える。該当がなければ「- 特になし」と書く。\n"
+        "\n"
+        "【詳細】\n"
+        "「■ 新機能」「■ 修正」「■ 変更」の見出しの下に、原文の全項目を漏れなく1項目ずつ日本語で並べる。"
+        "1行=1変更とし、各行は「- 」で始める。ごく些末なもの(表示崩れ等)のみ"
+        "「- その他、〜など細かい不具合を修正」と1行にまとめてよい。"
+        "該当項目がないカテゴリは見出しごと省く。見出しの前には空行を入れる。\n"
+        "\n"
+        "この形式以外の前置き・結び・装飾は出力しない。\n"
+        "\n"
         f"# Claude Code v{version}\n{notes_text}"
     )
     try:
@@ -104,6 +125,13 @@ def summarize_ja(version: str, notes: list[str]) -> str | None:
     except Exception as e:  # 要約失敗は致命的でないので原文にフォールバック
         print(f"warning: 要約に失敗 (v{version}): {e}", file=sys.stderr)
         return None
+
+
+def notification_body(summary: str | None, notes: list[str]) -> str:
+    """通知用の短い本文を作る。要約があれば【詳細】より前 (概要+重要) だけを使う。"""
+    if not summary:
+        return "\n".join(f"- {n}" for n in notes)
+    return summary.split("【詳細】")[0].strip()
 
 
 # ---------------------------------------------------------------- notify
@@ -255,10 +283,10 @@ def write_site(state: dict) -> None:
     SITE_FILE.write_text(render_site(state["releases"]), encoding="utf-8")
 
 
-def backfill() -> int:
-    """要約が未生成の既存エントリ (初期登録分など) に日本語要約を後付けする。"""
+def backfill(force: bool = False) -> int:
+    """要約が未生成の既存エントリに日本語要約を後付けする。force=True なら全件作り直す。"""
     state = load_state()
-    pending = [r for r in state["releases"] if not r.get("summary_ja")]
+    pending = [r for r in state["releases"] if force or not r.get("summary_ja")]
     if not pending:
         print("要約が未生成のエントリはありません")
         return 0
@@ -291,7 +319,7 @@ def test_notify() -> int:
     pages_url = os.environ.get("PAGES_URL") or None
     if state["releases"]:
         rel = state["releases"][0]
-        body = rel.get("summary_ja") or "\n".join(f"- {n}" for n in rel["notes"])
+        body = notification_body(rel.get("summary_ja"), rel["notes"])
         version = f"{rel['version']} (テスト)"
     else:
         version, body = "0.0.0 (テスト)", ""
@@ -341,7 +369,7 @@ def check() -> int:
             })
         for r in targets:
             summary = summarize_ja(r["version"], r["notes"])
-            body = summary or "\n".join(f"- {n}" for n in r["notes"])
+            body = notification_body(summary, r["notes"])
             notify_discord(r["version"], body, pages_url)
             notify_slack(r["version"], body, pages_url)
             state["releases"].insert(0, {
@@ -359,12 +387,15 @@ def check() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Claude Code リリースノート監視")
     parser.add_argument(
-        "--mode", choices=["check", "backfill", "test-notify"], default="check",
-        help="check=通常の監視 / backfill=既存エントリを日本語要約 / test-notify=通知の疎通確認",
+        "--mode", choices=["check", "backfill", "backfill-all", "test-notify"], default="check",
+        help="check=通常の監視 / backfill=要約なしのエントリだけ要約 / "
+             "backfill-all=全エントリの要約を作り直し / test-notify=通知の疎通確認",
     )
     args = parser.parse_args()
     if args.mode == "backfill":
         return backfill()
+    if args.mode == "backfill-all":
+        return backfill(force=True)
     if args.mode == "test-notify":
         return test_notify()
     return check()

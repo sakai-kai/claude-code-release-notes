@@ -9,11 +9,12 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "実行モード (check=通常 / backfill=既存分を日本語要約 / test-notify=通知テスト)"
+        description: "実行モード (check=通常 / backfill=要約なし分を要約 / backfill-all=全件要約し直し / test-notify=通知テスト)"
         type: choice
         options:
           - check
           - backfill
+          - backfill-all
           - test-notify
         default: check
 
