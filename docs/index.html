@@ -45,10 +45,82 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-07-22 22:47 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-07-24 22:47 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.218 <span class="badge">NEW</span> <span class="date">2026-07-22</span></h2>
+<h2>v2.1.219 <span class="badge">NEW</span> <span class="date">2026-07-24</span></h2>
+<div class="summary">【概要】
+既定のOpusモデルが「Claude Opus 5」になり、サブエージェントの多重呼び出し範囲拡大など複数の変更が行われました。
+
+【重要】
+- 既定のOpusモデルが「Claude Opus 5」になりました。文脈(=一度に扱える会話の量)は最大100万トークン、高速モードの料金は入力100万トークンあたり10ドル・出力50ドルです。(影響: Opusモデルを使っている人)
+- サブエージェント(=Claudeが呼び出す補助的な作業役)が、さらに別のサブエージェントを呼び出せる深さが、既定で1段階から3段階まで広がりました。(影響: サブエージェントやワークフロー機能でAIに作業を任せている人)
+- 「claude -p」でコマンドラインから実行した際、応答の途中でAPIエラーが起きると、それまでに生成されていた回答ごと消えてしまう不具合を修正しました。(影響: スクリプトやCIなどで「claude -p」を使っている人)
+
+【詳細】
+
+■ 新機能
+- 既定のOpusモデルが「Claude Opus 5」になりました。文脈(=一度に扱える会話の量)は最大100万トークン、高速モードの料金は入力100万トークンあたり10ドル・出力50ドルです。
+- サンドボックス(=コマンドを隔離実行する安全な実行環境)で使うコマンドについて、許可リストにない接続先への通信を、確認なしでそのまま拒否できる設定「sandbox.network.strictAllowlist」を追加。
+- 「/add-dir」コマンドなどで作業中に新しい作業フォルダを追加したタイミングで実行される「DirectoryAdded」という自動処理(フック)を追加。
+- 画面を使わないモードでの実行時、設定の検証に失敗して読み込まれなかったMCP連携(=外部ツール連携)の情報が出力に含まれるようになり、通常のターミナル実行では起動時に警告が表示されるようになった。
+- 複数のAIエージェントを組み合わせて動かす「ワークフロー」機能で、一度に使うエージェント数の目安をどの設定ファイルからでも指定できる設定「workflowSizeGuideline」を追加。この設定がある場合は「/config」の該当項目は表示されなくなる。
+- サブエージェント(=Claudeが呼び出す補助的な作業役)がさらに別のサブエージェントを呼び出した場合、その2階層目以降のやり取りも、出力設定「--forward-subagent-text」を有効にしていれば表示されるようになった。
+- MCP連携への接続に失敗した際、「claude mcp list」コマンドや「/mcp」画面にエラーの詳細が表示されるようになり、また設定値の前後に見えない空白が入っている場合に警告が出るようになった。
+- セルフホストランナー(=社内サーバー上でセッションを動かす仕組み)の起動やセッションが失敗した際、フックの不具合・ランナー自体のクラッシュ・設定ミスなど、原因の種類を区別して表示するようになった。
+- 実行中のワークフローの状態表示に、現在の既定の規模設定と、変更方法(/config)への案内が表示されるようになった。
+
+■ 修正
+- 「claude -p」でコマンドラインから実行した際、応答の途中でAPIエラーが起きると、それまでに生成されていた回答ごと消えてしまう不具合を修正。
+- セルフホストランナーが再起動している間に承認した操作が、セッション再開時に反映されず消えてしまう不具合を修正。
+- モデル選択画面で、契約プランに含まれているはずの「Fable」モデルが「利用にはクレジットが必要」と誤表示されることがあった不具合を修正。
+- セルフホストランナーの起動中に強制終了の信号が届くと、終了処理が完了するまで実行中のような表示が残り続けていた不具合を修正。
+- モデル選択画面で、統合された「Opus」の表示が単に「Opus」となっており、「Opus(100万トークン文脈)」という表記に統一されていなかった不具合を修正。
+- ターミナルを分割・多重化する「GNU screen」使用時、選択した文字列をコピーすると、コピー内容の代わりに文字化けした文字列がそのまま画面に出力されてしまう不具合を修正。
+- リモート操作機能で、モデルを切り替えたり、再接続したり、組織確認に失敗したりした後も、高速モードの状態表示が古いまま残ってしまう不具合を修正。
+- Windowsで環境変数「CLAUDE_CODE_GIT_BASH_PATH」にbash以外の実行ファイルを指定していると、終了してしまったり、そのまま誤って使われてしまったりしていた不具合を修正。今は指定が無効な場合は警告を出して無視する。
+- Vimキー操作モードで、入力欄が空の状態で「←」キーを押すと、操作コマンド用のモード(NORMALモード)からでも会話画面に戻れるようになった(これまでは文字入力モードからしか戻れなかった)。
+- 読み上げ機能(スクリーンリーダー)向けモードで、1文字入力するたびに入力欄全体を読み上げ直していた不具合を修正。今は入力した文字だけが読み上げられる。
+
+■ 変更
+- 複数のAIエージェントを組み合わせる「ワークフロー」機能の既定の規模が、目安としてエージェント15体未満を推奨する「中」設定になった。「/config」の「Dynamic workflow size」から変更可能。
+- 組織側で管理しているMCP連携の許可・禁止リストにある変数の値を、設定ファイル内の環境変数ではなく、起動時の環境変数や組織管理設定側の環境変数から取得するように変更。
+- モデル選択画面のハイライト表示が、一覧の中の一部モデルではなく、最新モデルの名前だけに当たるよう変更。
+- 高速モードの対象からOpus 4.7が外れた。「/fast」はOpus 5とOpus 4.8に適用される。
+- claude-apiスキル(=Claude APIの使い方をまとめたリファレンス)が、既定モデルをOpus 5とし、Opus 4.8からの移行手順を含むよう更新された。
+- サブエージェントが、さらに別のサブエージェントを呼び出せる深さが、既定で1段階から3段階まで広がった。環境変数「CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1」を設定すれば元の1段階に戻せる。
+- 「Remote Controlはapi.anthropic.com経由でのみ利用可能です」というエラーメッセージに、原因となっている具体的な設定名が表示されるようになった。
+- 「claude --teleport」使用時、今開いている作業フォルダがセッションの想定と異なるリポジトリを指している場合に、どのリポジトリを指しているかが表示されるようになった。</div>
+<details><summary>原文リリースノート (27件)</summary><ul><li>Added Claude Opus 5 (`claude-opus-5`), now the default Opus model — 1M context, fast mode at $10/$50 per Mtok</li>
+<li>Added `sandbox.network.strictAllowlist` setting to deny non-allowlisted hosts for sandboxed commands without prompting</li>
+<li>Added `DirectoryAdded` hook that fires after `/add-dir` or the SDK `register_repo_root` control request registers a new working directory mid-session</li>
+<li>Added `mcp_server_errors` to the headless stream-json init event, listing `--mcp-config` entries skipped by config validation; terminal runs print a startup warning</li>
+<li>Added the `workflowSizeGuideline` settings key so the advisory Dynamic workflow size guideline can be set from any settings file; the `/config` row is hidden while one does</li>
+<li>Added nested subagent forwarding in stream-json: subagents spawned at depth-2+ now appear when `--forward-subagent-text` is set, keyed by their spawning Agent `tool_use` id</li>
+<li>Fixed `claude -p` text output dropping the answer already produced when a turn dies on a mid-stream API error</li>
+<li>Added HTTP status and error text to `claude mcp list` and `/mcp` when a server fails to connect, and a warning for MCP config values with hidden leading or trailing whitespace</li>
+<li>Fixed a permission you approved while a self-hosted runner was restarting being dropped when the session resumed, so the approved action now runs</li>
+<li>Fixed the Fable model row showing &quot;Requires usage credits&quot; for plans that include it, when a stale cache had baked the label in</li>
+<li>Fixed a SIGTERM arriving while a self-hosted runner was starting up leaving a stale active row until the lease expired; it now deregisters cleanly</li>
+<li>Added structured failure categories to self-hosted runner spawn and session failures, so hook errors, runner crashes and config errors can be told apart</li>
+<li>Fixed the `/model` picker showing the merged Opus row as plain &quot;Opus&quot; instead of &quot;Opus (1M context)&quot;</li>
+<li>Fixed copy-on-select inside GNU screen printing base64 into the terminal instead of copying the selection</li>
+<li>Fixed Remote Control clients keeping a stale fast-mode status after a model switch, reconnect, or failed org check</li>
+<li>Fixed `CLAUDE_CODE_GIT_BASH_PATH` on Windows exiting or being used as bash when the path isn&#x27;t a bash/sh binary; it&#x27;s now ignored with a warning</li>
+<li>Fixed Vim mode: pressing ← on an empty prompt now returns to the agent view from NORMAL mode, not just INSERT</li>
+<li>Fixed screen-reader mode rewriting the entire input line on every keystroke instead of echoing only the typed character</li>
+<li>Improved the &quot;Remote Control is only available via api.anthropic.com&quot; error to name the specific setting that caused it</li>
+<li>Improved `claude --teleport` to show which repo your current checkout points at when it doesn&#x27;t match the session&#x27;s repo</li>
+<li>Changed dynamic workflows to default to a medium size guideline (aim for fewer than 15 agents); pick another size or unrestricted with Dynamic workflow size in `/config`</li>
+<li>Changed managed MCP allowlist/denylist `${VAR}` entries to resolve from the startup environment and managed-settings env instead of settings-file env</li>
+<li>Changed the `/model` picker to highlight only the newest model&#x27;s name, so the highlight marks the new release rather than an arbitrary subset of the list</li>
+<li>Added the current default workflow size to the running-workflow status line, with a pointer to `/config` for changing it</li>
+<li>Removed Opus 4.7 from fast mode; `/fast` now applies to Opus 5 and Opus 4.8</li>
+<li>Updated the claude-api skill to default to Claude Opus 5, with a migration path from Opus 4.8</li>
+<li>Subagents can now spawn nested subagents up to depth 3 by default (was 1); set CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=1 to disable nesting</li></ul></details>
+</article>
+<article>
+<h2>v2.1.218 <span class="date">2026-07-22</span></h2>
 <div class="summary">【概要】
 コードレビューの実行方法変更と、入力・表示・接続まわりの不具合修正を中心とした更新です。
 
