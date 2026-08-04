@@ -45,10 +45,68 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-04 05:35 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-04 22:49 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.221 <span class="badge">NEW</span> <span class="date">2026-08-04</span></h2>
+<h2>v2.1.222 <span class="badge">NEW</span> <span class="date">2026-08-04</span></h2>
+<div class="summary">【概要】
+worktreeで隔離されたセッションの安全性を強化し、MCP使用量集計やリモートコントロールの自動起動条件などを修正・変更。
+
+【重要】
+- worktree(=作業ツリーを分離した隔離環境)で動かすセッションとそのサブエージェントが、隔離元の本体リポジトリに対して削除などの破壊的なgitコマンドを実行できてしまう不具合を修正(影響: worktreeで隔離した環境やサブエージェントを使っている人)
+- リモートコントロールの自動起動を、リポジトリ内の設定ファイルでは有効にできないよう変更。無効化はこれまで通り可能で、有効にするには`/config`から個人設定として行う(影響: リモートコントロールをチームで利用し、リポジトリ側の設定ファイルを管理している人)
+- ultraplan機能を削除(影響: ultraplan機能を使っていた人)
+
+【詳細】
+
+■ 修正
+- worktree(=作業ツリーを分離した隔離環境)で動かすセッションとそのサブエージェントが、隔離元の本体リポジトリに対して削除などの破壊的なgitコマンドを実行できてしまう不具合を修正。ファイル編集とBashコマンドの隔離が、すべての種類のセッションで働くようになった
+- バックグラウンドで実行されるエージェントの処理(会話の要約、圧縮、名前変更など)で、ツール実行を自動許可するフックの設定がツール制限をすり抜けてしまう不具合を修正
+- Team/Enterpriseプランの`/usage-credits`で、以前送った利用クレジットの申請が却下されたメンバーに「既に申請済みです」と表示され、新しく申請を送れなくなる不具合を修正
+- HTTPSプロキシ環境で、起動時の接続確認がしばらく固まったあとに失敗する不具合を修正。通常のAPI通信と同じ経路でプロキシに対応し、失敗時は分かりやすいメッセージで区別されるようになった
+- 実際には最後まで完了していた応答に対して「Connection closed mid-response」というエラーが表示されてしまう不具合を修正
+- `/usage`の集計で、MCPサーバーの使用量が実際より多く表示される不具合を修正。あるMCPサーバーを一度でも呼び出すとその後の会話全体が使用量に計上されていたが、実際にそのツールの結果を使ったやり取りだけが計上されるようになった
+- ブランチをpushしたあとに作成したプルリクエスト(GitHub REST API経由での作成を含む)が、セッションにひも付かない不具合を修正
+- 組織側で利用可能なモデルが制限されている環境で、サブエージェントやチームメイトに`model: opus`のような系統名でモデルを指定すると、その系統内で組織が許可する最新モデルではなく親セッションと同じモデルまで格下げされてしまう不具合を修正
+- 独自の`ANTHROPIC_BASE_URL`を使うゲートウェイ経由の利用で、サーバー側から接続維持の信号が届いているにもかかわらず、応答待ちが一定時間で打ち切られてしまう不具合を修正
+- セッションのログイン情報が無効なとき、claude.aiとの連携(コネクタ)が「要認証」と誤表示される不具合を修正。`/login`を促す表示に変わった
+- MCPサーバーの削除などでローカルから使えなくなったツールについて、実行時のエラーが表示されない不具合を修正
+- `SendMessage`が、長い要約メッセージを文字数制限のために送信失敗していた不具合を修正。制限を超える場合は自動的に切り詰めて送信されるようになった
+- サブエージェントの実行記録画面で、処理の作業量設定(effort)がサブエージェント自身の設定ではなく、呼び出し元セッションの設定として表示されてしまう不具合を修正
+- ファイルの変更監視中にファイルシステムのエラーが起きた場合や、監視終了処理中に、まれにアプリがクラッシュする不具合を修正
+- スクリーンリーダー向けの`--ax-screen-reader`モードで、Backspaceキーを押すたびに入力欄の内容全体が読み上げられてしまう不具合を修正。行末の文字を削除した場合は、削除した文字だけが読み上げられるようになった
+- `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST`を使う環境で、ホスト側が指定したモデル選択より、古い管理用設定ファイル(managed-settings.json)の内容が優先されてしまう不具合を修正
+
+■ 変更
+- autoモードの安全性を強化。`SendMessage`で他のエージェントセッションにメッセージを送る際も、送信前に権限のチェックを受けるようになった
+- 呼び出しをモデルから制限しているスキル(`disable-model-invocation`設定)をClaudeが実行しようとした際の案内メッセージを改善。処理内容を独自に再現しようとするのではなく、ユーザーにそのスキルを実行してもらうよう頼むようになった
+- `/diff`表示、リモートコントロールでのワークスペース差分表示、Claude Code on the webセッションでのファイル編集差分表示について、リポジトリ側で設定された差分表示用の変換処理を無視し、gitの元データをそのまま使って表示するように変更
+- リモートコントロールの自動起動を、リポジトリ内の設定ファイル(`.claude/settings.json`や`.claude/settings.local.json`)では有効にできないよう変更。無効化はこれまで通り可能で、有効にするには`/config`から個人設定として行う
+- ultraplan機能を削除</div>
+<details><summary>原文リリースノート (21件)</summary><ul><li>Fixed worktree-isolated sessions and their subagents being able to run destructive git commands against the main checkout; isolation now applies to file edits and Bash in every session type</li>
+<li>Fixed PreToolUse auto-allow hooks bypassing tool restrictions in background agent tasks (summaries, compaction, renames)</li>
+<li>Fixed `/usage-credits` on Team and Enterprise showing &quot;you&#x27;ve already sent a usage credit request&quot; for members whose earlier request was dismissed, blocking them from sending a new one</li>
+<li>Fixed the startup connectivity check hanging and then failing behind an HTTPS proxy; it now uses the same proxy-aware transport as API requests and times out with a clear message</li>
+<li>Fixed &quot;Connection closed mid-response&quot; errors being reported on responses that had actually completed</li>
+<li>Fixed `/usage` overattributing usage to MCP servers: a server&#x27;s share now reflects only the requests that actually consumed its tool results, instead of every turn after any call to it</li>
+<li>Fixed sessions not linking to pull requests created after the branch was pushed, including through the GitHub REST API</li>
+<li>Fixed org-restricted `model: opus`-style subagent and teammate family aliases dropping to the parent model instead of stepping down to the newest org-allowed model in the family</li>
+<li>Fixed stream idle timeout firing on custom `ANTHROPIC_BASE_URL` gateways despite server keep-alive pings arriving on the wire</li>
+<li>Fixed claude.ai connectors being falsely marked as needing authorization when the session token is invalid — they now show a `/login` hint instead</li>
+<li>Fixed tool errors not being displayed for tools no longer available locally, for example after an MCP server is removed</li>
+<li>Fixed `SendMessage` rejecting a long summary — it now truncates instead, so sends no longer fail on a character limit</li>
+<li>Fixed the spinner&#x27;s effort label in a subagent&#x27;s transcript view showing the session&#x27;s effort level instead of the subagent&#x27;s own `effort:` setting</li>
+<li>Fixed rare crashes when a file watcher hit a filesystem error or during file-watcher teardown</li>
+<li>Fixed screen readers re-reading the whole input line on every backspace in `--ax-screen-reader` mode — end-of-line deletions now echo just the deleted characters</li>
+<li>Fixed host model-selection keys not taking precedence over a stale on-disk `managed-settings.json` when `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST` is set</li>
+<li>Improved auto mode safety: messages sent to other agent sessions via `SendMessage` are now evaluated by the permission classifier before dispatch</li>
+<li>Improved the refusal when Claude tries to invoke a skill with `disable-model-invocation`: Claude is now told to ask you to run the skill instead of replicating its workflow</li>
+<li>Improved the `/diff` view, the Remote Control workspace diff, and file-edit diffs in Claude Code on the web sessions to use raw git blob content, ignoring workspace-configured diff drivers and textconv</li>
+<li>Changed Remote Control auto-start so repo-local settings (`.claude/settings.json` or `.claude/settings.local.json`) can no longer turn it on (they can still turn it off); enable it at user scope via `/config`</li>
+<li>Removed ultraplan feature</li></ul></details>
+</article>
+<article>
+<h2>v2.1.221 <span class="date">2026-08-04</span></h2>
 <div class="summary">【概要】
 Bash権限確認の抜け穴修正、認証情報を隠すマスク機能追加、バックグラウンド実行の挙動変更など多数を含む更新。
 
