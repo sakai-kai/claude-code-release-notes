@@ -1,6 +1,32 @@
 {
-  "last_version": "2.1.222",
+  "last_version": "2.1.223",
   "releases": [
+    {
+      "version": "2.1.223",
+      "notes": [
+        "Added owner wildcard entries (`\"owner/*\"`) to the `strictKnownMarketplaces` and `blockedMarketplaces` managed settings for allowing or blocking all marketplace repos under a GitHub org",
+        "Added a warning when workflow agents, forked skills, slash commands, or resumed background agents' requested subagent model is restricted and the parent model runs instead",
+        "Added a `/teleport` hint in cloud sessions showing how to continue locally with `claude --teleport <session id>`",
+        "Fixed a Bash permission bypass where a crafted command could hide parts of itself from permission checks",
+        "Fixed permission prompts so commands padded with tabs or invisible Unicode can no longer hide part of the command from the approval dialog",
+        "Fixed workflow scripts being able to use dynamic `import()` to run code outside the workflow sandbox",
+        "Fixed a permission gap where an agent definition's `bypassPermissions` mode ignored the org bypass-permissions disable policy",
+        "Fixed resuming a session after a mid-session `/cd` coming back empty",
+        "Fixed gateway model discovery hiding Claude models registered under provider-prefixed IDs such as `vertex_ai/claude-*` or `bedrock/anthropic.claude-*`",
+        "Fixed `modelOverrides` keys that aren't Anthropic model IDs being treated as the session's canonical model ID; unknown keys are now ignored as documented",
+        "Fixed managed settings: server-delivered settings no longer disable the env block of a machine-local `managed-settings.json` or MDM profile; admin env now merges per key",
+        "Fixed sandboxed commands failing to start on Linux when `sandbox.filesystem.denyWrite` covers the working directory",
+        "Fixed forked background agents getting stuck \"already resuming\" for the rest of the session when rebuilding the fork's parent prompt failed during resume",
+        "Fixed a resumed session failing every turn, or leaving the interactive app on an unresponsive error screen, when its history held a malformed diagnostics attachment",
+        "Fixed a rare hang when parsing unusual `git push` output",
+        "Changed `CLAUDE_CODE_DISABLE_1M_CONTEXT` to hold every Claude model with a native 1M window to 200K via auto-compaction, not just a fixed list; a startup warning now appears when auto-compaction isn't holding the session to 200K",
+        "Changed auto-compact to keep sessions on unrecognized model IDs within the assumed context window instead of letting them grow past it; set `CLAUDE_CODE_DISABLE_UNKNOWN_MODEL_WINDOW_ENFORCEMENT=1` to restore the previous behavior",
+        "Changed `/review` to be an alias of `/code-review`, which reviews the current diff or a PR (`/code-review <level> <pr#>`); use `/code-review ultra` for a deep cloud review",
+        "Changed `/code-review` with no effort level to reuse the level you typed last; type a level like `/code-review high` to change it"
+      ],
+      "summary_ja": "【概要】\n権限確認をすり抜けるコマンドの不具合を修正し、/reviewを/code-reviewに統合しました。\n\n【重要】\n- 細工したコマンドや、タブ・見えない文字で埋めたコマンドによって、実行前の権限確認ダイアログにコマンドの一部が表示されなくなる不具合を修正しました。(影響: 権限確認ダイアログを見てコマンド実行の可否を判断している利用者)\n- /reviewコマンドは/code-reviewに統合され、直前の変更内容やPull Requestをレビューするコマンドとして使えるようになりました。(影響: /reviewコマンドを使っている利用者)\n- 会話の履歴に壊れた添付データが含まれていると、セッションを再開したときに毎回操作が失敗したり、操作できないエラー画面のまま固まったりする不具合を修正しました。(影響: 過去のセッションを再開して作業を続けている利用者)\n\n【詳細】\n\n■ 新機能\n- 特定のGitHub組織配下のマーケットプレイス(=拡張機能の配布元)をまとめて許可・拒否できる、オーナー名にワイルドカード(例: \"owner/*\")を使った設定に対応しました。\n- ワークフローのエージェントやフォークしたスキル、スラッシュコマンド、再開したバックグラウンドエージェントが指定したサブエージェント用モデルが利用制限されていて、代わりに親のモデルで実行された場合に警告が表示されるようになりました。\n- クラウド上のセッションで、`claude --teleport <セッションID>`を使ってローカル環境から続きの作業をする方法を案内する「/teleport」のヒントが表示されるようになりました。\n\n■ 修正\n- 細工したコマンドを使うと、実行前の権限確認でコマンドの一部が見えなくなってしまう不具合を修正しました。\n- コマンドをタブや目に見えない文字で埋めることで、承認ダイアログにコマンドの一部が表示されなくなる不具合を修正しました。\n- ワークフローのスクリプトから動的な`import()`を使うことで、本来隔離されているはずの実行環境の外でコードを動かせてしまう不具合を修正しました。\n- エージェント定義側で権限確認を省略する設定(bypassPermissions)にしていると、組織側でその省略を禁止するポリシーを設定していても無視されてしまう不具合を修正しました。\n- 作業中に`/cd`でディレクトリを変更した後にセッションを再開すると、内容が空になってしまう不具合を修正しました。\n- Vertex AIやBedrockなど、提供元の名前が付いたID(例: `vertex_ai/claude-*`、`bedrock/anthropic.claude-*`)で登録されたClaudeモデルが、利用可能なモデルの一覧に表示されない不具合を修正しました。\n- `modelOverrides`の設定でAnthropic純正のモデルIDではないキーを指定すると、それがセッションの現在のモデルとして誤って扱われてしまう不具合を修正しました。今後はドキュメント通り、該当しないキーは無視されます。\n- 組織側から配布される設定によって、各端末の`managed-settings.json`やMDMプロファイルで設定した環境変数がまとめて無効化されてしまう不具合を修正しました。今後は管理者側の環境変数が項目ごとに統合されます。\n- Linux環境で、隔離実行環境の書き込み禁止設定(`sandbox.filesystem.denyWrite`)が作業ディレクトリを含んでいる場合に、隔離実行環境で動かすコマンドが起動できない不具合を修正しました。\n- フォークして作成したバックグラウンドエージェントを再開する際、元になった会話内容の再構築に失敗すると、そのセッション中ずっと「再開中」のまま動かなくなる不具合を修正しました。\n- 会話の履歴に壊れた診断データの添付が含まれていると、セッションを再開したときに毎回操作が失敗したり、操作できないエラー画面のまま固まったりする不具合を修正しました。\n- `git push`の出力内容によっては、まれに処理が固まってしまう不具合を修正しました。\n\n■ 変更\n- `CLAUDE_CODE_DISABLE_1M_CONTEXT`の対象が、あらかじめ決められた一部のモデルだけでなく、100万トークンまで扱えるすべてのClaudeモデルに広がり、自動要約によって20万トークン相当に収まるよう調整されるようになりました。あわせて、自動要約でも20万トークンに収まらない場合に起動時警告が表示されるようになりました。\n- 対応が明確でないモデルIDを使うセッションでも、自動要約によって想定される上限トークン数を会話が超えて膨らまないように調整されるようになりました。以前の挙動に戻したい場合は`CLAUDE_CODE_DISABLE_UNKNOWN_MODEL_WINDOW_ENFORCEMENT=1`を設定してください。\n- `/review`は`/code-review`のエイリアス(=別名)になり、直前の変更内容やPull Requestをレビューできるようになりました(`/code-review <レベル> <PR番号>`)。より詳細なレビューをしたい場合は`/code-review ultra`でクラウド上の詳細レビューを実行できます。\n- レビューの詳しさ(エフォートレベル)を指定せずに`/code-review`を実行すると、前回指定したレベルがそのまま使われるようになりました。レベルを変えたいときは`/code-review high`のように指定してください。",
+      "detected_at": "2026-08-06T05:35:29+00:00"
+    },
     {
       "version": "2.1.222",
       "notes": [
