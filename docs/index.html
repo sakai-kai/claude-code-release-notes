@@ -45,10 +45,90 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-06 05:36 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-07 04:45 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.223 <span class="badge">NEW</span> <span class="date">2026-08-06</span></h2>
+<h2>v2.1.224 <span class="badge">NEW</span> <span class="date">2026-08-07</span></h2>
+<div class="summary">【概要】
+セルフホスト実行環境やセッション間メッセージ機能を追加し、保護された実行環境やセッション管理の不具合を多数修正。
+
+【重要】
+- 保護された実行環境(サンドボックス)で、読み取り禁止フォルダの指定末尾に「/」を付けていた場合、LinuxとmacOSで制限がすり抜けられる不具合を修正(影響: サンドボックスで~/.awsなど機密フォルダへのアクセスを制限している人)
+- プロジェクトの保存場所が長い(200文字超)場合に、セッション一覧・名前変更・複製・削除・`/resume`が別プロジェクトのものに誤って影響する不具合を修正(影響: 深い階層や長い名前のフォルダでプロジェクトを管理している人)
+- フィードバック送信時に会話記録を共有すると、同意した場合に限り直近のやり取りで使われたモデルの設定(`CLAUDE.md`の指示を含むシステムプロンプトなど)も送られるようになった(影響: フィードバック送信時に会話記録を共有している人)
+
+【詳細】
+
+■ 新機能
+- 自分で用意したマシンやコンテナ上でClaude Codeのweb・モバイル・デスクトップ版のセッションを実行できる「セルフホスト環境」機能を追加(`claude self-hosted-runner`、Team/Enterpriseプラン限定)
+- プラグインのインストール方法として、gitやnpmを使わずHTTPS経由のzipファイルから直接インストールできる「archive」形式を追加(SHA-256によるファイル改ざんチェックも指定可能)
+- コマンド入力欄に貼り付けた内容が期限切れなどで使えなくなり、それを取り除くとコマンドの文章自体が変わってしまう場合に、確認画面を挟んでから取り消せるようにした
+- Bedrock利用時、`AWS_REGION`から自動的に決まるリージョンではなく、特定のリージョンをまたいだ推論先を優先させる環境変数`ANTHROPIC_BEDROCK_REGION_PREFIX`を追加
+- 権限を制限せずに動いているセッションへ他のセッションからメッセージが届いた際に、その場で承認を求める設定`crossSessionInbound`と、承認待ちの有効期限を決める設定`dialogExpiry`を追加。それ以外の宛先へのメッセージは自動的に届くようになった
+- 保護された実行環境(サンドボックス)で、認証情報などを自動でマスクする設定を追加。値の一部だけ抜き出す`extract`、抜き出せなかった場合の挙動を決める`onExtractNoMatch`、JWT(=ログイン情報などを含む形式のトークン)向けに中身を判別してマスクする`decode: &quot;jwt&quot;`と`maskClaims`、AWSの署名方式(SigV4)向けの`awsPairs`/`sigv4`を用意。いずれも通信内容を検査できるようにする設定(`network.tlsTerminate`)が必要で、組織管理者側の設定でのみ有効
+- 同じ利用者が使っている複数のClaude Codeセッション同士でメッセージを送り合える機能を追加。`ListAgents`で他のセッションを一覧表示できる(macOSとLinuxが対象)
+
+■ 修正
+- プロジェクトの保存場所が長い(200文字超)場合に、内部で短縮した名前が別プロジェクトと重なり、セッション一覧・名前変更・複製・削除・`/resume`(=以前の会話を再開する機能)が別プロジェクトのものに誤って影響する不具合を修正
+- 他のセッションへメッセージを送った際、実際には届いていないのに「送信しました」と表示されてしまう不具合を修正。届かなかった場合は正しくエラー表示されるようにした
+- 保護された実行環境(サンドボックス)で、読み取り禁止フォルダの指定末尾に「/」を付けていた場合(例: `denyRead: &quot;~/.aws/&quot;`)、LinuxとmacOSで制限がすり抜けられてしまう不具合を修正
+- 保護された実行環境(サンドボックス)でファイルや通信へのアクセスが拒否された際、その理由がBashコマンドの実行結果に表示されず、Claudeが拒否の詳細を把握できない不具合を修正
+- 会話の途中で新しく接続された外部ツール(MCP)が、機能の検索対象に含まれつつも名前がClaudeに伝わらない不具合を修正
+- 同じプラグインを複数のプロジェクトにインストールすると、インストール記録が壊れてしまう不具合を修正
+- 貼り付けた内容を呼び出したり復元したりする際、古くなっていた場合や番号が重複した場合に、別の内容が紛れ込んだり文章が消えたりする不具合を修正
+- Linuxの画面表示方式の一つ(Wayland)で、選択した文字列がクリップボードにコピーされないことがある不具合を修正(2つの書き込み処理が競合していたため)
+- フィードバック送信時に会話記録を共有する機能が、長い会話では実際には失敗しているのに成功したように表示される不具合を修正。失敗時はエラー表示されるようにした
+- リモートコントロール(=他の端末からセッションを操作する機能)の自動起動が、ログイン情報が古い状態での起動直後に失敗することがある不具合を修正
+- リモートコントロールおよびSDK連携で、`/clear`など画面に表示するものがない操作の後に「(no content)」という空の表示が出てしまう不具合を修正
+- 接続元のセッションが期限切れになった後にリモートコントロールを再接続すると、それまでのローカルの会話内容が新しいセッションにアップロードされてしまう不具合を修正
+- [VSCode拡張機能] 接続に失敗しているのに、リモートコントロールが接続済みと表示されてしまう不具合を修正
+- 利用者がリモートコントロールを無効にしていても、会話を再開する操作(`--resume`、SDK、VSCode拡張機能)を行うと自動的に再接続されてしまう不具合を修正
+- [VSCode拡張機能] `remoteControlAtStartup`を有効にしていても、その設定が反映されないことがある不具合を修正
+
+■ 変更
+- フルスクリーン表示で、会話が自動要約されるたびに古い履歴が消えていたのを改善し、要約前の会話全体をさかのぼって表示できるようにした
+- リモートコントロールで接続中のweb・モバイル端末からも、会話の自動要約が進んでいる様子と要約後の区切りが見えるようにした(これまでは無言で止まって見えていた)。`/clear`によるリセットも接続先に反映されるようにした
+- リモートコントロールの接続失敗時、これまでの8秒だけ表示されるポップアップ通知ではなく、詳細と再接続ボタン付きの表示が消えずに残るようにした
+- 1セッションあたり200個までだった補助エージェント(サブエージェント)の起動数上限を撤廃。長時間のセッションでも新しい補助エージェントを起動できなくなる問題がなくなった(同時実行数や呼び出しの階層数の上限は引き続きあり)
+- 組織の管理者が設定する項目が変わっていない場合、再ログインや組織切り替えのたびに承認画面が再表示されないようにした
+- フィードバック送信時の会話記録共有について、同意した場合に限り直近のやり取りで使われたモデルの設定(`CLAUDE.md`の指示を含むシステムプロンプトや、ツールの定義、モデルのパラメータ)も送られるようにした。機密情報はこれまで通り除外され、データ量が大きすぎる場合はこれらの項目から先に取り除かれる
+- Bashツールの説明文を変更し、コマンドの実行結果はモデルには見えるが利用者の画面には必ずしも表示されるとは限らない旨を明記
+- 呼び出した貼り付け内容を入力欄に反映する際の番号を、反映されたタイミングで振り直すようにした
+- リモートコントロールで、会話の自動要約や`/resume`によって新しいセッションが作られた際、古い接続先を残したままにするのではなく保管扱いにするようにした</div>
+<details><summary>原文リリースノート (31件)</summary><ul><li>Added self-hosted environments: `claude self-hosted-runner` turns your own machines or containers into a place Claude Code web, mobile, and desktop sessions can run, on Team and Enterprise plans</li>
+<li>Added `archive` plugin source: install plugins from a zip over HTTPS without git or npm, with optional SHA-256 pinning</li>
+<li>Added a cancel-and-confirm step when removing an unavailable paste changes a command&#x27;s text</li>
+<li>Added `ANTHROPIC_BEDROCK_REGION_PREFIX` env var for Bedrock to prefer a specific cross-region inference profile over the `AWS_REGION`-derived one</li>
+<li>Added `crossSessionInbound` and `dialogExpiry` settings: cross-session messages sent to a session running with bypassed permissions are held for your approval, and messages to other sessions auto-deliver</li>
+<li>Added sandbox credential-masking options: `extract` and `onExtractNoMatch` for structured env values, `decode: &quot;jwt&quot;` with `maskClaims` for JWT-aware masking, and `awsPairs`/`sigv4` for AWS SigV4 re-signing; these need `network.tlsTerminate` and are honored only from user, managed, or `--settings` settings</li>
+<li>Added cross-session `SendMessage`: Claude Code sessions can now message each other, on any of your machines, with `ListAgents` to discover them (macOS and Linux)</li>
+<li>Fixed long (&gt;200 char) project paths resolving to another project&#x27;s session directory under a shared sanitized prefix; session list, rename, fork, delete and `/resume` no longer cross projects</li>
+<li>Fixed `SendMessage` reporting &quot;Message sent&quot; when the write to a teammate&#x27;s inbox had actually failed; failed deliveries are now reported as errors</li>
+<li>Fixed sandbox filesystem deny entries written with a trailing slash (e.g. `denyRead: &quot;~/.aws/&quot;`) being silently bypassable on Linux and macOS</li>
+<li>Fixed sandbox violation details never appearing in Bash tool results; Claude now sees which file or network access was denied and why</li>
+<li>Fixed MCP tools that connect mid-turn being deferred for tool search without their names announced to the model</li>
+<li>Fixed plugin install records being silently corrupted when the same plugin is installed in multiple projects</li>
+<li>Fixed recalled or restored paste content occasionally attaching wrong data or silently losing text when the paste had aged out or placeholder numbers collided</li>
+<li>Fixed copy-on-select on Wayland sometimes not reaching the clipboard; the two selection writes no longer race</li>
+<li>Fixed the feedback survey&#x27;s transcript share silently failing on long sessions; a failed share now shows an error instead of a success message</li>
+<li>Fixed Remote Control auto-start intermittently failing with &quot;Remote credentials fetch failed&quot; on a cold start with a stale login token</li>
+<li>Fixed Remote Control and SDK clients showing a blank &quot;(no content)&quot; message after `/clear` and other output-less commands</li>
+<li>Fixed a Remote Control session recreated after its server session expired uploading prior local conversation history into the new session</li>
+<li>Improved fullscreen mode to keep the full pre-compaction history in scrollback across repeated compactions, instead of only the most recent interval</li>
+<li>Improved Remote Control: attached web and mobile clients now see compaction progress and the post-compaction boundary instead of a silent pause; `/clear` resets now propagate to attached clients</li>
+<li>Improved Remote Control: connection failures now show a persistent failure indicator with details and a reconnect shortcut, instead of only an 8-second toast</li>
+<li>Removed the 200-subagent-per-session spawn cap; long-running sessions no longer refuse new agents (concurrency and depth limits still apply)</li>
+<li>Changed managed settings: the approval prompt no longer re-appears after re-login or org switching when the organization&#x27;s settings are unchanged</li>
+<li>Changed the feedback-survey transcript share: with your consent it now also uploads the last request&#x27;s model settings — the system prompt (which includes your `CLAUDE.md` instructions), tool definitions, and model parameters. Secrets are redacted as before, and these fields are dropped first if the share is too large</li>
+<li>Changed the Bash tool description to always note that command output is displayed to the model, not reliably to the user</li>
+<li>Changed recalled paste placeholder numbers to renumber when accepted into the input</li>
+<li>Changed Remote Control to archive the stale server session instead of leaving a dead one listed when a fresh session is minted after compaction or `/resume`</li>
+<li>[VSCode] Fixed the extension showing Remote Control as connected after the connection failed</li>
+<li>Fixed a session resume silently reconnecting Remote Control after the user turned it off (`--resume`, SDK hosts, and the VS Code extension)</li>
+<li>[VSCode] Fixed sessions not honoring `remoteControlAtStartup` when explicitly enabled</li></ul></details>
+</article>
+<article>
+<h2>v2.1.223 <span class="date">2026-08-06</span></h2>
 <div class="summary">【概要】
 権限確認をすり抜けるコマンドの不具合を修正し、/reviewを/code-reviewに統合しました。
 
