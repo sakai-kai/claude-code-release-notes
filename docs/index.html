@@ -45,10 +45,70 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-07 04:45 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-08 03:59 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.224 <span class="badge">NEW</span> <span class="date">2026-08-07</span></h2>
+<h2>v2.1.226 <span class="badge">NEW</span> <span class="date">2026-08-08</span></h2>
+<div class="summary">【概要】
+今回は主に不具合修正と動作の安定性向上が中心のアップデートです。
+
+【重要】
+- 特になし
+
+【詳細】
+
+■ 修正
+- その他、細かい不具合の修正と安定性の向上</div>
+<details><summary>原文リリースノート (1件)</summary><ul><li>Bug fixes and reliability improvements</li></ul></details>
+</article>
+<article>
+<h2>v2.1.225 <span class="date">2026-08-08</span></h2>
+<div class="summary">【概要】
+利用上限の警告表示やリモート操作機能を改善し、認証エラーや履歴の不具合などを修正しました。
+
+【重要】
+- 長期間有効なログイン用トークン(CLAUDE_CODE_OAUTH_TOKEN)を使っていると、一時的な認証エラーで短期トークンに置き換わり、再起動するまで画面操作なしの実行が動かなくなる問題を修正(影響: そのトークンで自動実行・バックグラウンド運用をしている人)
+- macOSで外部サービス連携(MCP)のログインが、パスワード管理機能の読み込み遅延により失敗し続ける問題を修正(影響: macOSでMCP経由の外部サービス連携を使っている人)
+- 長い会話を要約した後にリモート操作でセッションを再開すると、履歴が壊れる問題を修正(影響: 別端末からのリモート操作で長時間の会話を続けている人)
+
+【詳細】
+
+■ 新機能
+- 組織全体の利用上限(ゲートウェイ経由の支出上限)に達したときの警告に、上限の内容やリセット時刻、管理者からのメッセージが表示されるようになりました(要 2.1.225 のゲートウェイ)
+- 信頼していないフォルダで `claude agents` を実行したときも、通常の `claude` と同じようにフォルダを信頼するかどうかを確認するメッセージが表示されるようになりました
+- メッセージ送信機能から、他の端末で動いているリモート操作用のセッションに自分から話しかけられるようになりました。エージェント一覧にはそれらのセッションが「名前 [参照]」の形式で表示されます
+
+■ 修正
+- 長期間有効なログイン用トークン(CLAUDE_CODE_OAUTH_TOKEN)を使っていると、一時的な認証エラーで短期トークンに置き換わり、再起動するまで画面操作なしの実行が動かなくなる問題を修正
+- macOSで外部サービス連携(MCP)のログインが、パスワード管理機能の読み込み遅延により失敗し続ける問題を修正
+- 自動実行モードで、安全性チェックによる拒否を通常の権限拒否と同じように数えてしまい、拒否が続くと停止してしまう問題を修正。動作自体は今も拒否されますが、AIには別の方法を試すよう伝えられるようになりました
+- 別のセッションから届いたメッセージが、画面操作なしの実行中や起動時には通知も期限もないまま止まってしまう問題を修正
+- 長い会話を要約した後にリモート操作でセッションを再開すると、履歴が壊れる問題を修正
+- エージェント一覧で他のプロジェクトのセッションにマウスを乗せると、次に起動するエージェントの作業フォルダが変わってしまう問題を修正
+- 自前で用意した実行環境(セルフホストランナー)で、指定した作業用フォルダが作成・書き込みできない場合に、登録は成功するのにその後すべてのセッションが失敗する問題を修正。今は起動時にわかりやすいエラーで止まるようになりました
+- ブラウザ版のセッションが実際には動いているのに「止まっている」と誤って表示され、再接続のたびに溜まった通知を毎回送り直してしまう問題を修正
+- [VSCode] フォーカス表示で、最新のやることリストや、答えを待っている質問の内容、確定した回答が折りたたまれて見えなくなる問題を修正。考え中の内容だけを示す部分は「Ns考えました」のように表示され、そのやり取りが終わると再び折りたたまれます
+- メッセージ送信機能で、リモート操作の送信先として確認済みの相手が、その端末側の一覧を確認できなかった場合に、同じ名前のこのマシン上のセッションへ誤って差し替わらないようにしました
+
+■ 変更
+- リモート操作機能を改善し、Claudeアプリから添付した写真を、ファイルとして読み込み直す手間なくそのままAIに見せられるようになりました</div>
+<details><summary>原文リリースノート (14件)</summary><ul><li>Added gateway spend-limit support to Claude Code&#x27;s usage warning; the limit-reached message now names the cap, its reset time, and the operator&#x27;s message (requires the gateway on 2.1.225)</li>
+<li>Added a workspace trust prompt to `claude agents` for untrusted directories, matching the behavior of `claude`</li>
+<li>Fixed a transient 401 replacing a long-lived `CLAUDE_CODE_OAUTH_TOKEN` with a stored login&#x27;s short-lived token, breaking headless sessions until restart</li>
+<li>Fixed MCP OAuth servers on macOS intermittently failing with a burst of 401 errors, as if never authenticated, after a keychain read timed out</li>
+<li>Fixed auto mode counting a safety-filter refusal of its own permission check toward the consecutive-block limit; the action is still denied, but the model is now told to move on rather than retry</li>
+<li>Fixed cross-session messages staying parked without a notice or expiry in headless sessions and during startup</li>
+<li>Fixed conversation history breaking on Remote Control session resume after very large conversations were compacted</li>
+<li>Fixed hovering over a session in another project in the agents list changing the directory the next agent starts in</li>
+<li>Fixed `claude self-hosted-runner` registering and then failing every session when `--base-dir` cannot be created or written; it now exits at startup with a clear error</li>
+<li>Fixed Claude Code on the web sessions being misreported as stuck, re-sending a growing event backlog on every reconnect</li>
+<li>Improved Remote Control: photos attached from the Claude app are now shown to Claude directly instead of being read from disk with a separate tool call</li>
+<li>[VSCode] Fixed Focus view folding away the latest to-do list, a pending question&#x27;s context, and settled answers; thinking-only folds show &quot;Thought for Ns&quot; and re-collapse when their turn completes</li>
+<li>SendMessage can now start a conversation with your Remote Control sessions on other machines by name (`ListAgents` shows them as `name [ref]`), instead of only replying after they message you first</li>
+<li>SendMessage: a Remote Control recipient you already confirmed is never swapped for a same-named session on this machine when its own list couldn&#x27;t be checked</li></ul></details>
+</article>
+<article>
+<h2>v2.1.224 <span class="date">2026-08-07</span></h2>
 <div class="summary">【概要】
 セルフホスト実行環境やセッション間メッセージ機能を追加し、保護された実行環境やセッション管理の不具合を多数修正。
 
