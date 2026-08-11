@@ -45,10 +45,36 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-08 03:59 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-11 04:06 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.226 <span class="badge">NEW</span> <span class="date">2026-08-08</span></h2>
+<h2>v2.1.227 <span class="badge">NEW</span> <span class="date">2026-08-11</span></h2>
+<div class="summary">【概要】
+ログイン期限切れ時の誤表示とGitHub Actions上でのコマンド失敗を修正した更新です。
+
+【重要】
+- ログイン情報の期限が切れた状態でセッションを開始すると、契約プランの判定が行われず、Maxプランの利用者にも「Fableの利用クレジットを有効にしてください」という誤った案内が表示されていました(影響: Maxプランの利用者)。
+- claude-code-actionでallowed_non_write_usersを設定し、GitHubが用意する実行環境で動かしている場合、Bashコマンドがすべて失敗していました(影響: GitHub Actions上でこの設定を使っている人)。
+- 会話を最初のメッセージより前まで巻き戻した(=過去の状態に戻した)あとでも、/tuiを実行すると巻き戻したはずの会話が復元されてしまうことがありました(影響: 会話の巻き戻し機能と/tuiを併用する人)。
+
+【詳細】
+
+■ 修正
+- ログイン情報の期限が切れた状態でセッションを開始すると、契約プランの判定が行われないまま機能の有効・無効設定が読み込まれ、Maxプランの利用者にも「Fableの利用クレジットを有効にしてください」という誤った案内が表示されることがあった問題を修正
+- claude-code-actionでallowed_non_write_usersを設定し、GitHubが用意する実行環境で使用していた場合に、Bashコマンドがすべて失敗していた問題を修正
+- 会話を最初のメッセージより前の状態まで巻き戻した(=過去の状態に戻した)あとでも、/tuiを実行すると巻き戻す前の会話が復元されてしまう問題を修正
+
+■ 変更
+- スラッシュコマンドの候補一覧の表示を改善し、選択中の行だけが青色でハイライトされるようになったほか、入力に一致した文字は色を変えず太字で示されるようになり、絵文字やアクセント記号を含むコマンド名も正しく表示されるように変更
+- ファイルが見つからない場合の候補表示や@メンションのサイズ確認を行うときに発生していた処理の一時停止を減らし、動作が軽快になるよう改善</div>
+<details><summary>原文リリースノート (5件)</summary><ul><li>Fixed feature flags being evaluated without the user&#x27;s subscription tier when a session started with an expired login token, which could wrongly prompt Max plan users to enable usage credits for Fable</li>
+<li>Fixed every Bash command failing under `claude-code-action` with `allowed_non_write_users` on GitHub-hosted runners</li>
+<li>Fixed `/tui` bringing back a conversation that had been rewound to before its first message</li>
+<li>Improved slash-command menu: blue now marks only the selected row, matched characters are bolded instead of recolored, and emoji or accented names keep their glyphs</li>
+<li>Improved performance: fewer event-loop stalls on file-not-found suggestions and at-mention size checks</li></ul></details>
+</article>
+<article>
+<h2>v2.1.226 <span class="date">2026-08-08</span></h2>
 <div class="summary">【概要】
 今回は主に不具合修正と動作の安定性向上が中心のアップデートです。
 

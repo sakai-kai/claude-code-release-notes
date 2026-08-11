@@ -1,6 +1,18 @@
 {
-  "last_version": "2.1.226",
+  "last_version": "2.1.227",
   "releases": [
+    {
+      "version": "2.1.227",
+      "notes": [
+        "Fixed feature flags being evaluated without the user's subscription tier when a session started with an expired login token, which could wrongly prompt Max plan users to enable usage credits for Fable",
+        "Fixed every Bash command failing under `claude-code-action` with `allowed_non_write_users` on GitHub-hosted runners",
+        "Fixed `/tui` bringing back a conversation that had been rewound to before its first message",
+        "Improved slash-command menu: blue now marks only the selected row, matched characters are bolded instead of recolored, and emoji or accented names keep their glyphs",
+        "Improved performance: fewer event-loop stalls on file-not-found suggestions and at-mention size checks"
+      ],
+      "summary_ja": "【概要】\nログイン期限切れ時の誤表示とGitHub Actions上でのコマンド失敗を修正した更新です。\n\n【重要】\n- ログイン情報の期限が切れた状態でセッションを開始すると、契約プランの判定が行われず、Maxプランの利用者にも「Fableの利用クレジットを有効にしてください」という誤った案内が表示されていました(影響: Maxプランの利用者)。\n- claude-code-actionでallowed_non_write_usersを設定し、GitHubが用意する実行環境で動かしている場合、Bashコマンドがすべて失敗していました(影響: GitHub Actions上でこの設定を使っている人)。\n- 会話を最初のメッセージより前まで巻き戻した(=過去の状態に戻した)あとでも、/tuiを実行すると巻き戻したはずの会話が復元されてしまうことがありました(影響: 会話の巻き戻し機能と/tuiを併用する人)。\n\n【詳細】\n\n■ 修正\n- ログイン情報の期限が切れた状態でセッションを開始すると、契約プランの判定が行われないまま機能の有効・無効設定が読み込まれ、Maxプランの利用者にも「Fableの利用クレジットを有効にしてください」という誤った案内が表示されることがあった問題を修正\n- claude-code-actionでallowed_non_write_usersを設定し、GitHubが用意する実行環境で使用していた場合に、Bashコマンドがすべて失敗していた問題を修正\n- 会話を最初のメッセージより前の状態まで巻き戻した(=過去の状態に戻した)あとでも、/tuiを実行すると巻き戻す前の会話が復元されてしまう問題を修正\n\n■ 変更\n- スラッシュコマンドの候補一覧の表示を改善し、選択中の行だけが青色でハイライトされるようになったほか、入力に一致した文字は色を変えず太字で示されるようになり、絵文字やアクセント記号を含むコマンド名も正しく表示されるように変更\n- ファイルが見つからない場合の候補表示や@メンションのサイズ確認を行うときに発生していた処理の一時停止を減らし、動作が軽快になるよう改善",
+      "detected_at": "2026-08-11T04:06:04+00:00"
+    },
     {
       "version": "2.1.226",
       "notes": [
