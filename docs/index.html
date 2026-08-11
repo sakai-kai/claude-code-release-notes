@@ -45,10 +45,62 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-11 04:06 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-11 22:27 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.227 <span class="badge">NEW</span> <span class="date">2026-08-11</span></h2>
+<h2>v2.1.228 <span class="badge">NEW</span> <span class="date">2026-08-11</span></h2>
+<div class="summary">【概要】
+画面が固まる、CI実行環境で毎回失敗するなど複数の不具合を修正した更新です。
+
+【重要】
+- 作業中に画面の表示が完全に止まってしまい、プロセス自体は動き続けているのに操作ができなくなる不具合を修正(影響: ターミナルで対話的にClaude Codeを使っている人)
+- セッションを片付ける処理が、プロジェクトの記憶(メモリー)を保存しているフォルダの中身まで消してしまう不具合を修正(影響: メモリー機能でプロジェクトの情報を保存している人)
+- セルフホストランナー(自分のマシンやサーバーで自動実行するCI環境)で、更新を反映しないリポジトリの取得処理が失敗すると、新しい実行環境を使うたびに必ずセッションが失敗する不具合を修正(影響: セルフホストランナーでClaude Codeを自動実行している人)
+
+【詳細】
+
+■ 修正
+- 対話的なセッション中に、まれに発生する内部の表示処理のエラーをきっかけに、プロセスは動き続けているのに画面の表示が完全に止まってしまう不具合を修正
+- WindowsでClaude Codeをgitインストール先の親フォルダから起動すると、gitやGit Bashが見つからなくなる不具合を修正
+- /model でモデルを変更した後に /tui を使うと、セッションが以前のモデルに戻ってしまう不具合を修正
+- 複数セッション間のメッセージ機能で、インストールやアップグレード直後の最初のセッションにメッセージの受信箱が用意されないことがある不具合を修正
+- リモートコントロール機能で接続中に /resume を使うと、再開した会話のタイトルや内容が接続先のセッションに漏れて表示されることがある不具合を修正
+- セルフホストランナーで、更新を反映しないリポジトリの取得処理が失敗すると、新しい実行環境を使うたびに必ずセッションが失敗する不具合を修正。該当のリポジトリは警告を表示したうえでスキップされるように変更
+- セルフホストランナーで、バックグラウンドの作業が終わってから次のやり取りが始まるまでの合間にセッションが終了してしまう不具合を修正
+- セッションを片付ける処理が、プロジェクトの記憶(メモリー)を保存しているフォルダの中身まで消してしまう不具合を修正
+- バックグラウンドで行われるプラグインの保存データの整理処理が、開発中でリンク参照しているだけのプラグインの保存データまで消してしまう不具合を修正
+- 複数の設定ファイルを組み合わせて使っている場合に、優先度の高い設定でプラグイン配布元の情報を上書きすると、別の設定ファイルの独自ヘッダー情報を意図せず引き継いでしまう不具合を修正。プラグイン配布元の情報はまとめて上書きされるように変更
+- スキルを実行した後、あとで使う追加機能についての案内が誤って2回送られてしまうことがある不具合を修正
+
+■ 変更
+- claude.aiと同期したスキルについて、手元のコマンドやMCP(外部ツール連携)の定型文を上書きしないようにし、説明文を無害化した上でどこから来たものか分かるように表示し、コマンド実行やファイル読み込みを勝手に行わないように安全性を強化
+- 複数セッション間のメッセージ機能を改善し、送信者と本文がその場で表示されるようになり、別のマシンのリモートコントロール接続先へのメッセージには送信元のセッション名が表示されるように変更
+- Vertex AI利用時、Google Cloudの認証情報が期限切れまたは未設定の場合に、数分間再試行し続けるのではなく数秒で失敗を通知するように改善
+- 会話ログを整理する処理の進行状況表示を改善し、進捗バーだけでなく再試行までの秒数や処理が止まっている場合のヒントも表示されるように変更
+- 新しいモデルでは、今回のセッションでまだ読み込んでいない既存ファイルでも上書きできるように変更(ファイル編集機能と同じ挙動)。古いモデルでは引き続き事前の読み込みが必要
+- Pro、Max、Teamプランの初回利用時の案内から、自動モードのセッションが少し割高になるという古い記載を削除
+- その他、一部のターミナルでタブの表示がちらつく問題を減らすため処理中アイコンの見た目を調整するなど細かい改善を実施</div>
+<details><summary>原文リリースノート (18件)</summary><ul><li>Fixed interactive sessions that could stop redrawing entirely, while the process kept running, after a rare internal layout error</li>
+<li>Fixed `git` / Git Bash not being found on Windows when Claude Code is launched from a parent folder of the git installation</li>
+<li>Fixed `/tui` reverting the session to an earlier model when `/model` had been changed since the last response</li>
+<li>Fixed cross-session messaging sometimes starting without an inbox in the first session after install or upgrade</li>
+<li>Fixed Remote Control `/resume` while connected leaking the resumed conversation&#x27;s title or history into the connected session</li>
+<li>Fixed `claude self-hosted-runner` sessions failing on every fresh runner when the `checkout` hook fails for a repository the session doesn&#x27;t push to; that repository is now skipped with a warning</li>
+<li>Fixed self-hosted runners ending sessions in the gap between a background task finishing and the follow-up turn starting</li>
+<li>Fixed session cleanup deleting contents inside a project&#x27;s memory folder</li>
+<li>Fixed background plugin-cache cleanup deleting a plugin&#x27;s cache when its only version is a symlinked development checkout</li>
+<li>Fixed a settings-merge issue where a marketplace entry redefined in a higher-precedence settings tier could inherit another tier&#x27;s custom headers; marketplace entries now merge as whole entries</li>
+<li>Fixed the deferred-tools reminder occasionally being sent to the model twice after a skill invocation</li>
+<li>Hardened skills synced from claude.ai: they no longer shadow local commands or MCP prompts, their descriptions are sanitized and labeled, and on your machine their bodies don&#x27;t run `!` commands or expand `@` files</li>
+<li>Improved cross-session messages: the sender and body now display inline instead of a collapsed line, and messages to Remote Control sessions on other machines show your Remote Control session name as the sender</li>
+<li>Improved Vertex AI credential handling: expired or missing Google Cloud credentials now fail within seconds instead of retrying for minutes</li>
+<li>Improved compaction progress: the retry countdown and stall hint now appear during compaction instead of only a progress bar</li>
+<li>Updated terminal title busy-spinner glyphs to reduce tab-bar jitter on some terminals</li>
+<li>Changed the Write tool so newer models can overwrite an existing file they haven&#x27;t read this session, matching the Edit tool&#x27;s rules; older models still require the read first</li>
+<li>Removed the outdated note about auto mode sessions costing slightly more from the first-use notice for Pro, Max, and Team plans</li></ul></details>
+</article>
+<article>
+<h2>v2.1.227 <span class="date">2026-08-11</span></h2>
 <div class="summary">【概要】
 ログイン期限切れ時の誤表示とGitHub Actions上でのコマンド失敗を修正した更新です。
 
