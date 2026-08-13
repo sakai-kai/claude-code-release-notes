@@ -1,6 +1,14 @@
 {
-  "last_version": "2.1.229",
+  "last_version": "2.1.231",
   "releases": [
+    {
+      "version": "2.1.231",
+      "notes": [
+        "Fixed MCP OAuth sign-in failing with a redirect URI mismatch for servers that use a pre-registered OAuth client, such as Slack"
+      ],
+      "summary_ja": "【概要】\nSlackなど事前登録済みの認証設定を使うMCPサーバーで、サインインが失敗する不具合を修正\n\n【重要】\n- 認証後にアプリへ戻る転送先のURLが一致せず、SlackなどのMCPサーバーにサインインできなかった問題を修正(影響: SlackなどのMCPサーバーと連携してログインを行う人)\n\n【詳細】\n\n■ 修正\n- SlackのようにOAuth連携用の設定があらかじめ登録されているMCPサーバーで、認証後にアプリへ戻る転送先のURLが一致せずサインインに失敗していた問題を修正",
+      "detected_at": "2026-08-13T22:26:42+00:00"
+    },
     {
       "version": "2.1.229",
       "notes": [

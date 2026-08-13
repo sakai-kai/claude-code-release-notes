@@ -45,10 +45,24 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-12 22:27 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-13 22:26 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.229 <span class="badge">NEW</span> <span class="date">2026-08-12</span></h2>
+<h2>v2.1.231 <span class="badge">NEW</span> <span class="date">2026-08-13</span></h2>
+<div class="summary">【概要】
+Slackなど事前登録済みの認証設定を使うMCPサーバーで、サインインが失敗する不具合を修正
+
+【重要】
+- 認証後にアプリへ戻る転送先のURLが一致せず、SlackなどのMCPサーバーにサインインできなかった問題を修正(影響: SlackなどのMCPサーバーと連携してログインを行う人)
+
+【詳細】
+
+■ 修正
+- SlackのようにOAuth連携用の設定があらかじめ登録されているMCPサーバーで、認証後にアプリへ戻る転送先のURLが一致せずサインインに失敗していた問題を修正</div>
+<details><summary>原文リリースノート (1件)</summary><ul><li>Fixed MCP OAuth sign-in failing with a redirect URI mismatch for servers that use a pre-registered OAuth client, such as Slack</li></ul></details>
+</article>
+<article>
+<h2>v2.1.229 <span class="date">2026-08-12</span></h2>
 <div class="summary">【概要】
 表示の乱れや強制終了などの不具合を多数修正し、リモート実行やVSCode拡張の新機能も追加した更新です。
 
