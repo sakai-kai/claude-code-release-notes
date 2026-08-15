@@ -45,10 +45,68 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-14 04:33 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-15 03:25 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.232 <span class="badge">NEW</span> <span class="date">2026-08-14</span></h2>
+<h2>v2.1.233 <span class="badge">NEW</span> <span class="date">2026-08-15</span></h2>
+<div class="summary">【概要】
+Windowsの不具合修正とセキュリティ強化に加え、GitLab対応やメモリ制限などの新機能を追加。
+
+【重要】
+- Opus 4.8、Sonnet 5、Fable 5、Mythos 5など新しいモデルでは、作業中にタスクの進捗を一覧表示する機能が既定でオフになった。元に戻すには環境変数の設定が必要。(影響: 最新モデルで作業の進捗リストを見ながら使っている人)
+- Windowsで自動実行モード使用時、cdで移動してからコマンドを実行しファイルに保存するといった普通の操作でも、毎回手動確認を求められるようになっていた不具合を修正。(影響: Windowsで自動承認モードを使っている人)
+- Windowsで特殊な形式のパスがネットワーク共有パスとしての安全確認をすり抜け、認証情報が漏れる恐れがあった問題を修正。(影響: Windows環境でファイルパスを扱う人)
+
+【詳細】
+
+■ 新機能
+- 「--worktree」オプションや「claude agents」画面で、GitLabのマージリクエスト(GitHubのプルリクエストに相当)のURLを指定・表示できるようになった。一覧では「!番号」の形式で表示される。
+- 社内でAnthropicへのアクセスをまとめる中継サーバー(apps gateway)に、ログイン中ユーザーの情報をヘッダーとして転送する設定を追加(オプトイン)。中継の先にあるプロキシでユーザーごとの利用料を把握できるようになった。
+- Linuxで、Bashツールが実行するコマンドに使えるメモリの上限を設定できるようになった(環境変数CLAUDE_CODE_TOOL_MEMORY_LIMIT)。ビルドなどが暴走してメモリを使い切り、セッションが固まってしまうのを防げる。
+- WebFetchで取得したページ内容をキャッシュしておく時間を環境変数(CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS)で調整できるようになった(既定値は15分のまま変更なし)。
+
+■ 修正
+- クラウド上でセッションを実行中、権限確認の返答待ちの間に実行環境が終了すると、セッションが「失われた」と誤って表示されることがあった不具合を修正。
+- MCP(外部ツール連携)で、一定時間で接続を切るタイプのサーバー(サーバーレス環境など)に対して、通知受信用の接続を延々と再接続し続けてしまう不具合を修正。
+- Claude DesktopやVS Code上で使っているとき、権限確認のポップアップが出てもNotificationフック(=決められた処理を自動実行する仕組み)が反応しなかった不具合を修正。
+- Linuxでサンドボックス機能(=コマンド実行を隔離環境で制限する仕組み)を有効にしていると、操作していない間もCPUを1コア分ずっと使い切ってしまうことがあった不具合を修正。
+- 自分やプロジェクトで/checkupや/reviewと同名のスキルを用意していると、-pモード(非対話実行)やプラグイン・MCP使用時に標準搭載のスキルが「不明なコマンド」と表示されて使えなくなることがあった不具合を修正。
+- スキルやコマンドに渡した引数の値に、テンプレートの記号と紛らわしい文字列が含まれていると、意図せず再度展開されてしまうことがあった不具合を修正。
+- Windowsで特殊な形式のパスがネットワーク共有パスとしての安全確認をすり抜け、認証情報が漏れる恐れがあった問題を修正。
+- Windowsで自動実行モード使用時、cdで移動してからコマンドを実行しファイルに保存するといった普通の操作でも、毎回手動確認を求められるようになっていた不具合(2.1.232で発生)を修正。
+
+■ 変更
+- 「claude self-hosted-runner」使用時のセッション開始が高速化。作業内容を書き換えずにブランチを作成するようになり、起動を待たせていたサーバーとの2回のやり取りもなくなった。
+- 社内の中継サーバー(apps gateway)経由でVertex、Foundry、AWS上のClaude Platformを使っている場合、400/413エラー発生時に接続先本来のエラーメッセージがそのまま表示されるようになった。あわせて、自動要約(auto-compact)が中継サーバー経由でうまく動かない不具合も解消。
+- 「claude plugin validate」が、.claude/skillsフォルダ単体もチェック対象になり、SKILL.mdの先頭設定(フロントマター)が正しく書けていない場合に知らせてくれるようになった。
+- 画面読み上げソフトを使う場合、/effortの選択画面が番号付きリストになり数字を入力して選べるようになったほか、ヒントやダイアログの文章が途中で切れて読めなくなる問題も解消。
+- -pモード(非対話実行)で、Claude Codeが認識できないモデルIDにリクエストを送った際、エラー出力に[claude-code:unrecognized_model]という行が表示されるようになった。modelOverridesで対応付けをすれば表示を消せる。
+- リポジトリの接続先がgitlab.comやbitbucket.orgの場合、GitHub連携アプリの設定を勧める案内が表示されないようになった。また社内向けのマーケットプレイス案内は、GitHub以外の社内Gitサーバーでも表示されるようになった。
+- Opus 4.8、Sonnet 5、Fable 5、Mythos 5など新しいモデルでは、作業中にタスクの進捗を一覧表示する機能が既定でオフになった。従来どおり使いたい場合は環境変数CLAUDE_CODE_ENABLE_TODO_TOOLS=1を設定する。
+- Windowsで2.1.232にて変更されたBashの権限確認の挙動(Cygwin形式のリンクや「&lt; file」による入力読み込みに関するもの)を元に戻した。より影響範囲を絞った形で改めて提供予定。</div>
+<details><summary>原文リリースノート (20件)</summary><ul><li>Added GitLab merge request URL support to the `--worktree` flag and the `claude agents` view (where MRs display as `!N`)</li>
+<li>Added an opt-in `forward_user_identity` apps gateway setting on Anthropic upstreams that sends the signed-in user&#x27;s identity as headers, so a proxy behind the gateway can attribute spend per user</li>
+<li>Added opt-in memory cgroup support for Bash tool commands on Linux (`CLAUDE_CODE_TOOL_MEMORY_LIMIT`) so a runaway build can&#x27;t stall the session</li>
+<li>Added `CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS` environment variable to configure the WebFetch session URL cache TTL (default unchanged: 15 minutes)</li>
+<li>Fixed cloud sessions occasionally being marked as lost when the environment shut down while Claude was waiting on a permission prompt</li>
+<li>Fixed MCP v2 connections endlessly reopening the subscriptions/listen stream against servers that terminate long-held streams on a fixed timeout (e.g. serverless hosts)</li>
+<li>Fixed Notification hooks not firing for permission prompts when running under Claude Desktop or VS Code</li>
+<li>Fixed idle sessions on Linux sometimes keeping one CPU core at 100% when sandboxing is enabled</li>
+<li>Fixed bundled skill aliases like `/checkup` and `/review` reporting &quot;Unknown command&quot; in `-p` mode or with plugins/MCP loaded when a user or project skill shadows the bundled skill</li>
+<li>Fixed skill/command argument substitution to prevent argument values from being re-expanded as template markers</li>
+<li>Fixed Windows paths spelled with the NT `\??\` device prefix bypassing UNC path validation, closing an NTLM credential-leak vector</li>
+<li>Improved `claude self-hosted-runner` session start time: the session branch is now created without rewriting the working tree, and two server round trips no longer block the agent&#x27;s launch</li>
+<li>Improved apps gateway error forwarding: 400/413 errors from Vertex, Foundry, and Claude Platform on AWS upstreams now carry the upstream&#x27;s own message; fixes a bug with auto-compact on apps gateway</li>
+<li>Improved `claude plugin validate` to check a bare `.claude/skills` directory, reporting SKILL.md files whose frontmatter fails to parse</li>
+<li>Improved screen reader mode: the `/effort` selector renders as a numbered list with a typed-number prompt, and hint and dialog text is no longer clipped</li>
+<li>Improved print mode diagnostics: a `[claude-code:unrecognized_model]` line is written to stderr when a request goes out for a model ID Claude Code doesn&#x27;t recognize; map it with `modelOverrides` to silence</li>
+<li>Changed the GitHub app setup tip to no longer appear in repositories whose origin remote is on gitlab.com or bitbucket.org; the enterprise marketplace tip now covers non-GitHub internal git hosts</li>
+<li>Todo/task-tracking tools (TaskCreate/Get/Update/List, TodoWrite) are no longer available on Opus 4.8, Sonnet 5, Fable 5, Mythos 5, and newer models; set `CLAUDE_CODE_ENABLE_TODO_TOOLS=1` to bring them back</li>
+<li>Windows: fixed auto mode repeatedly stopping for manual approval on ordinary `cd &lt;dir&gt; &amp;&amp; &lt;command&gt; &gt; file` Bash commands (a 2.1.232 regression)</li>
+<li>Reverted the 2.1.232 Bash permission changes for Cygwin-style symlinks on Windows and for input redirections (`&lt; file`); a narrower version will return in a later release</li></ul></details>
+</article>
+<article>
+<h2>v2.1.232 <span class="date">2026-08-14</span></h2>
 <div class="summary">【概要】
 サブエージェントの既定動作変更、Windowsの権限不具合修正、Remote Control安定化などを含む更新です。
 
