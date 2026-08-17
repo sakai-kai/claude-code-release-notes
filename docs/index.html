@@ -45,10 +45,130 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-15 03:25 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-17 22:11 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.233 <span class="badge">NEW</span> <span class="date">2026-08-15</span></h2>
+<h2>v2.1.234 <span class="badge">NEW</span> <span class="date">2026-08-17</span></h2>
+<div class="summary">【概要】
+使用量上限後の自動再開やGitLab連携を追加し、権限確認や入力操作の不具合を多数修正しました。
+
+【重要】
+- 利用上限に達して待機していたセッションが、上限リセット時に自動的に再開するようになりました(影響: claude.aiの利用上限に達することがあるユーザー)
+- Windowsの特殊な形式のパスを悪用した認証情報の漏えいを防ぐ対策を追加しました(影響: Windows環境でファイル読み込みやセッション復元機能を使うユーザー)
+- 入力を予約(キュー)したメッセージが誤って再表示されたり、Escキーで応答が途中で中断されたりする不具合を修正しました(影響: メッセージを予約しながら連続で入力する日常的な利用者)
+
+【詳細】
+
+■ 新機能
+- 環境変数 CLAUDE_CODE_PROJECT_DIR_NAME を追加。セッションごとに設定フォルダを分けて管理する仕組みで、プロジェクトごとの会話記録フォルダに短い名前を付けられるようになりました
+- 「selection:clear」というキー操作を追加。1つのキーで、画面上で選択した文字列の選択を解除できます。エージェント一覧の画面でも使えます
+- GitLabのリモートリポジトリを使い、glabコマンドでログイン済みの場合、画面下部やステータス行にマージリクエストの番号と状態(下書き/確認中/成功)が表示されるようになりました
+- claude.aiの利用上限に達して待っていたセッションが、上限がリセットされると自動的に再開するようになりました。/configの「Continue automatically at usage limit」でオフにできます
+- Claude Code DesktopやVS Codeでホストするリモート操作セッションで、権限モードや使用中のモデルが変わると、スマートフォンやWeb版の画面にも反映されるようになりました
+- スマートフォンやWeb版で選んだ処理量(effort)の設定が、ターミナルやDesktop/VS Code側のセッションにも反映されるようになり、逆方向にも伝わるようになりました
+- /permissionsの画面をClaudeの作業中でも開けるようになりました。変更したルールは、その回のやり取りの残りにすぐ反映されます
+- /add-dir &lt;path&gt;もClaudeの作業中に使えるようになり、/add-dir、/autocompact、/theme、/help、/config、/advisorの各画面がフルスクリーン表示中でも作業の途中で開けるようになりました
+- /goalで目標待ちの間にバックグラウンドの作業が30分以上終わらない場合、Claudeが状況を確認しに行くようになりました。CLAUDE_CODE_GOAL_CHECKIN_MINUTES=0で無効にできます
+
+■ 修正
+- セキュリティ対策として、リモートファイルの読み込みやセッションの復元、CLAUDE.mdの読み込み、ワークフローの実行、ファイルのアップロードで、Windowsの特殊な形式のパス(\??\から始まるもの)を拒否するようにしました。認証情報が外部に漏れる恐れのある操作を防ぎます
+- 自動モードで長時間作業を続けていると、会話内容が要約されたあとに、安全のため隔離環境で実行するコマンドのネット接続許可が何度も確認・拒否され続ける不具合を修正しました
+- バックグラウンドで動くサブエージェントの許可確認に答えたとき、その回答(拒否も含む)がセッション内で保存されず忘れられてしまう不具合を修正しました
+- 一部のプロキシ経由などで使われる応答方式で、内容が欠けたデータブロックが含まれているとClaude Codeが強制終了する不具合を修正しました
+- 特殊な文字の並びを含むメッセージで、Markdown表示が非常に遅くなる不具合を修正しました
+- エージェント一覧から取得した宛先の名前が200文字ちょうど、または絵文字を多く含む場合に、メッセージ送信が失敗する不具合を修正しました
+- リモートリポジトリのURLに特殊な形式のユーザー情報が含まれると、接続先のホストを誤って読み取り、関連するリンクやリポジトリ固有の動作が別のホスト向けになる不具合を修正しました
+- MCPサーバーの診断表示に、設定の競合警告として実際の秘密情報(APIキーなど)がそのまま表示されていた不具合を修正。今後は${変数名}の形のまま表示され、接続失敗時の詳細もサーバーの接続先情報のみ表示されます
+- 拡張機能の配布元の許可リストが、実際に接続するホストと異なるホストを指す形式の配布元を誤って許可していた不具合を修正しました
+- フルスクリーン表示で、/loginのログイン用URLなどダイアログ内の文字列をコピーすると、一部の文字が欠ける不具合を修正しました
+- Markdown表示で「---」による区切り線が、次の行の文章とくっついて表示される不具合を修正しました
+- 連続して実行したシェルコマンドの間にタスク一覧の更新が挟まると、本来1つにまとまる「シェルコマンドを1件実行」の表示が複数に分かれる不具合を修正しました
+- 「!」から始めるシェルコマンドを実行中に/permissionsなどの画面を開くと、コマンドの終了と同時にその画面が閉じてしまう不具合を修正しました
+- 実行待ちにした「!」から始まるシェルコマンドを上矢印キーで呼び出して編集すると、コマンドとしてではなく通常の文章としてClaudeに送られてしまう不具合を修正しました
+- 入力を予約(キュー)したメッセージが、まだ順番待ちなのに入力履歴に再表示される不具合、予約メッセージを選んでいるときにEscキーを押すと応答が中断されてしまう不具合、入力の途中で送信すると「!」コマンドモードが解除されなくなる不具合を、それぞれ修正しました
+- 「新しいフルスクリーン表示を試しますか」という確認に応じてセッションを再起動すると、それまでの権限モード(--dangerously-skip-permissionsなど)、ツールの許可・拒否ルール、指定していたモデルや処理量の設定が失われる不具合を修正しました
+- /tuiコマンドで表示を切り替えて再起動すると、起動時に指定した--allowed-tools/--disallowed-toolsのルールが失われる不具合を修正。再起動で引き継げない制限がある場合は、理由を示したうえで切り替えを行わないようになりました
+- あるフォルダをリポジトリとして認識する前に開いたことがある場合、信頼確認の画面で「リポジトリ全体が対象になる」という注意書きが表示されないことがある不具合を修正しました
+- IDEの差分表示タブを閉じたタイミングが権限確認の再表示と重なると、新しい確認に対して直前の回答が誤って適用されてしまうことがある不具合を修正しました
+- Claude Code DesktopやVS Codeでホストしたリモート操作セッションからファイルを送ると、スマートフォンやWeb版で空のカードしか表示されずファイルが開けない不具合を修正しました
+- CLAUDE_CODE_OAUTH_TOKENを設定した状態で/loginを行った後、期限切れトークンに関する注意メッセージが自動的に再開されたClaudeの応答に紛れ込む不具合を修正。この注意は利用者にだけ表示されるようになりました
+- 権限確認の内容が信頼を許可していない外部サーバーにも送られてしまう不具合と、サーバー側で権限確認機能を使わない設定にしていてもその設定が無視される不具合を修正しました
+- 外部と共有される権限確認画面で、コマンドやファイルパス、送信先が承認者から見えなくなってしまう不具合を修正。秘密鍵のような大きなデータの伏せ字処理も、強力な設定では確実に隠れるようにしました
+- 各種サービスのAPIトークンが、直後にシェルの区切り記号(;や|など)が続く場合に伏せ字処理されず、権限確認画面にそのまま表示されてしまう不具合を修正しました
+- Claude Desktopでセッション間のメッセージ送受信が無効と判定されると、送られたメッセージが受信側で気づかれずに破棄され、送信側がいつまでも応答待ちの状態になる不具合を修正しました
+- このコンピューターで別のclaude.aiアカウントや組織にログインし直すと、実行中のリモート操作セッションが数秒以内に停止し理由も表示されるようになりました。これまでは数時間後に分かりにくいエラーが出るだけでした
+- /goalで目標を設定していても、認証の失効やクレジット残高切れ、扱える情報量の上限超過など回復できないエラーでやり取りが止まった場合は、目標設定が自動的に解除され通知が表示されるようになりました
+- claude setup-tokenコマンドに余計な引数を渡すと、これまでは無視されていましたが、今後はエラーとして扱われるようになりました
+- Windowsで~/.claude.jsonが読み取り専用になっていると、起動時にファイル名変更を何度も再試行して処理が止まってしまう不具合を修正しました
+
+■ 変更
+- Claudeはアカウントのメールアドレスを本人確認のためだけに使い、指示がない限り他のサービスへ送らないようになりました
+- SendMessageとListAgentsは、アカウントのセッション数が多すぎて全部を確認しきれなかった場合にその旨を伝えるようになりました。これまでは確認できなかったセッションを「存在しない」として扱っていました
+- Anthropicアカウントの認証情報が期限切れで、本来はclaude.aiでのログインが優先されるべき場合に/loginを案内するようになりました
+- 会話画面で、自分が入力したメッセージもClaudeの返答と同じようにMarkdown形式(コードの色分けや箇条書きなど)で表示されるようになりました
+- 「APIから空または不正な応答が返ってきました」というエラーの内容を改善し、実際に返ってきたデータの種類やサイズ、リクエストID、元の通信が失敗した理由まで表示するようになりました
+- 自動生成されるセッションのタイトルが、依頼内容をそのまま文章にしたものではなく、短く具体的な名前になるよう改善しました
+- 組み込みのclaude-apiスキルを読み込む際に消費していた容量を、20万トークン以上から約2万5千トークンに削減しました。参考資料を必要なときだけ読み込むようにしています
+- フルスクリーン表示でEscキーを押しても、マウスで選択した文字列の選択状態が解除されなくなりました。Escは通常どおり処理の中断や画面を閉じる動作を行い、選択自体はそのまま残ります
+- 自動モードでAgentツールを呼び出すたびに表示されていた「Allowed by auto mode classifier」という表示行を削除しました
+- /configの「Default teammate model」設定を廃止しました。チーム機能で追加するメンバーは、呼び出し時にモデルを指定しない限りリーダーと同じモデルを使います
+- 実行中のツール表示にある経過時間のカウンターの表示を薄くし、太字で表示される件数などが見やすくなるようにしました
+- やり取りの合間に届くバックグラウンド作業の通知が、やり取りの途中で届く場合と同じ形式でClaudeに伝えられるようになりました
+- 起動時にすでに使用するモデルが決まっている場合、管理者による固定設定を確認する処理を省略するようにしました</div>
+<details><summary>原文リリースノート (51件)</summary><ul><li>Added the optional `CLAUDE_CODE_PROJECT_DIR_NAME` environment variable: hosts that give each session its own config directory can choose a short name for the per-project transcript directory</li>
+<li>Added the `selection:clear` keybinding action, so a key can be bound to clear an in-app text selection; also works in the agents view</li>
+<li>Added a GitLab merge request badge to the footer and statusline: repos with a GitLab remote and an authenticated glab CLI show MR !N with draft/pending/green states</li>
+<li>Claude Code now continues your session automatically when a claude.ai usage limit resets; turn it off in `/config` (&quot;Continue automatically at usage limit&quot;)</li>
+<li>Claude is now told to use your account email only to identify you, and not to send it to unrelated services unless you ask</li>
+<li>Security: remote file reads, session restore, CLAUDE.md includes, workflow scripts and file uploads now reject Windows NT-namespace (`\??\`) paths, hardening the remaining pre-approval file accesses against the NTLM credential-leak vector</li>
+<li>Fixed auto mode in very long sessions repeatedly re-checking and denying sandboxed commands&#x27; network access after the conversation had been compacted</li>
+<li>Fixed session-scoped permission answers (including denies) being dropped when answering background subagent tool permission prompts</li>
+<li>Fixed a crash when an API response on the non-streaming fallback path (typically via third-party gateways) contained a thinking block missing its thinking field or a text block missing its text field</li>
+<li>Fixed markdown rendering becoming extremely slow for some messages containing unusual Unicode sequences</li>
+<li>Fixed `SendMessage` rejecting a recipient copied from `ListAgents` when the session name is at the 200-character cap or emoji-heavy</li>
+<li>Fixed repository detection mis-reading the host of git remotes with unusual userinfo, producing links and repo-specific behavior for the wrong host</li>
+<li>Fixed MCP diagnostics printing resolved secrets: scope-conflict warnings now show the configured `${VAR}` form, and connection-failure details show only the server origin</li>
+<li>Fixed `strictKnownMarketplaces` allowlists accepting SCP-style git marketplace sources whose host differs from the one git would actually connect to</li>
+<li>Fixed modal text such as the `/login` OAuth URL losing characters when copied in fullscreen</li>
+<li>Fixed a `---` horizontal rule in rendered markdown running into the line after it</li>
+<li>Fixed consecutive shell commands splitting into multiple &quot;Ran 1 shell command&quot; rows when todo/task updates were interleaved between them</li>
+<li>Fixed dialogs like `/permissions` opened while a `!` shell command was running being dismissed when the command finished</li>
+<li>Fixed a queued `!` shell command being sent to the model as plain text after pressing up-arrow to edit the queued input</li>
+<li>Fixed queued messages reappearing in the prompt history while still queued, Esc while selecting a queued message no longer interrupts the turn, and `!` mode no longer sticks after a mid-turn submit</li>
+<li>Fixed accepting the &quot;Try the new fullscreen renderer?&quot; prompt restarting the session without its permission mode (e.g. `--dangerously-skip-permissions`), tool allow/deny rules, model or effort flags</li>
+<li>Fixed `/tui` dropping launch `--allowed-tools`/`--disallowed-tools` rules when it restarts; it now declines to switch, with the reason, when the session has restrictions a restart can&#x27;t carry over</li>
+<li>Fixed trust prompts omitting the repository-wide scope warning when the directory was first seen before the repository existed there</li>
+<li>Fixed a case where an IDE diff tab closing during a permission re-prompt could answer the new prompt with the previous input</li>
+<li>Fixed: files sent to the user during Remote Control sessions hosted by Claude Code Desktop or VS Code now upload, so they open on phone and web instead of showing an empty card</li>
+<li>Fixed: after `/login` while `CLAUDE_CODE_OAUTH_TOKEN` is set, the stale-token reminder no longer leaks into Claude&#x27;s automatically resumed turn — it now appears only to you</li>
+<li>Fixed: permission previews now relay only to channel servers admitted by the inbound trust gate, and a server&#x27;s explicit permission-capability opt-out is honored</li>
+<li>Fixed: credential masking on relayed permission previews can no longer hide commands, paths, or destinations from the approver; oversized private-key blocks now redact under full-strength redaction</li>
+<li>Fixed: provider API tokens that mask on permission previews now mask even when directly followed by shell delimiters</li>
+<li>Fixed Claude Desktop inter-session messages being silently dropped by the recipient session when cross-session messaging read as disabled, which left the sender&#x27;s query &quot;thinking&quot; for many minutes</li>
+<li>Remote Control: signing this computer in to a different claude.ai account or organization now stops the running session within seconds and says why, instead of a misleading HTTP 404 hours later</li>
+<li>Remote Control sessions started from Claude Code Desktop or VS Code now keep phones and claude.ai/code updated on the session&#x27;s permission mode (and claude.ai/code on the model) as they change</li>
+<li>Remote Control: effort picks made on a phone or on claude.ai/code now apply to terminal- and Desktop/VS Code-hosted sessions, and the session publishes its effort level to connected clients</li>
+<li>`SendMessage` and `ListAgents` now say when your account&#x27;s session list was too long to check completely, instead of treating unseen sessions as absent</li>
+<li>Expired Anthropic profile credential now points you at `/login` when a claude.ai login would take precedence</li>
+<li>Improved the transcript: your own prompts now render markdown (highlighted code blocks, inline code, lists) the same way replies do</li>
+<li>Improved the &quot;API returned an empty or malformed response&quot; error to say what came back (content type, body kind, size, request ID) and why the original streaming request failed</li>
+<li>Improved auto-generated session titles to read as short, specific names (e.g. &quot;Login button bug&quot;) rather than sentences restating your request (e.g. &quot;Fix the login button on mobile&quot;)</li>
+<li>Reduced the context cost of loading the built-in `claude-api` skill from ~200k+ tokens to ~25k by loading reference docs on demand</li>
+<li>`/permissions` can now be opened while Claude is working — rule changes apply to the rest of the current turn</li>
+<li>`/add-dir &lt;path&gt;` can now be used while Claude is working; `/add-dir`, `/autocompact`, `/theme`, `/help`, `/config` and `/advisor` dialogs open mid-turn in the fullscreen TUI</li>
+<li>`/goal` now clears itself with a notice when a turn dies on an unrecoverable error (e.g. revoked auth, an exhausted credit balance, or a context overflow) instead of staying armed</li>
+<li>`/goal`: when background tasks keep a goal waiting for 30+ minutes, Claude now checks in on them instead of waiting indefinitely (set `CLAUDE_CODE_GOAL_CHECKIN_MINUTES=0` to opt out)</li>
+<li>`claude setup-token` now rejects unexpected extra arguments instead of silently ignoring them</li>
+<li>Changed Esc in fullscreen mode to no longer clear a mouse text selection: it interrupts or dismisses as usual and the selection stays highlighted</li>
+<li>Removed the redundant &quot;Allowed by auto mode classifier&quot; line that auto mode showed under every Agent tool call</li>
+<li>Removed the &quot;Default teammate model&quot; setting from `/config`; agent-team teammates now use the leader&#x27;s model unless the spawn names one</li>
+<li>Dimmed the elapsed-time counter on the running tool header so it no longer competes with the bold counts</li>
+<li>Background task notifications delivered between turns are now sent to the model inside `&lt;system-reminder&gt;` tags, matching mid-turn delivery</li>
+<li>Mantle: skip the admin-pin availability probe at startup when a main-loop model is already picked</li>
+<li>Windows: startup no longer stalls on repeated rename retries when `~/.claude.json` is read-only</li></ul></details>
+</article>
+<article>
+<h2>v2.1.233 <span class="date">2026-08-15</span></h2>
 <div class="summary">【概要】
 Windowsの不具合修正とセキュリティ強化に加え、GitLab対応やメモリ制限などの新機能を追加。
 
