@@ -45,10 +45,66 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-17 22:11 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-18 22:02 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.234 <span class="badge">NEW</span> <span class="date">2026-08-17</span></h2>
+<h2>v2.1.235 <span class="badge">NEW</span> <span class="date">2026-08-18</span></h2>
+<div class="summary">【概要】
+入力中のスペルチェックを追加し、権限確認まわりや表示崩れなど多数の不具合を修正しました。
+
+【重要】
+- 権限確認画面のコメント欄でShift+Tabを押すと、欄を閉じるはずが誤って編集を承認し、セッション全体の編集権限まで付与されてしまう不具合を修正(影響: 編集の権限確認でコメントを入力する人)
+- ノートブックのセル削除・置き換えの確認画面で、内容を読み込めない場合に元のセル内容が表示されないまま承認を求めていた不具合を修正(影響: Jupyterノートブックを編集する人)
+- コードの意味を解析する補助機能(言語サーバー)が接続し直された際に、それまでの会話キャッシュ全体が無効になり無駄なコストが発生していた不具合を修正(影響: エディタの補完機能と連携しながら長時間作業する人)
+
+【詳細】
+
+■ 新機能
+- 入力中に誤字を下線で示す「スペルチェック」設定を追加。パソコンにインストール済みのaspell、hunspell、ispellのいずれかを利用する
+
+■ 修正
+- コードの意味を解析する補助機能(言語サーバー)が接続し直された際に、それまでの会話キャッシュ全体が無効になっていた不具合を修正
+- 箇条書きを3階層以上ネストすると表示がずれる不具合を修正し、折り返した行にも字下げを追加
+- 複数行の入力時、スラッシュコマンドやキーワード、メンションのハイライト表示が実際の文字位置とずれることがあった不具合を修正
+- 権限確認画面のコメント欄でShift+Tabを押すと、欄を閉じるはずが誤って編集を承認し、セッション全体の編集権限まで付与されてしまう不具合を修正
+- Agent機能でエージェントの種類を指定せずに呼び出した場合、そのセッションで使えないはずの汎用エージェントが指定されたかのように見えていた不具合を修正。現在は利用可能なエージェント名を示す分かりやすいエラーを表示する
+- ノートブックのセル削除・置き換えの確認画面で、内容を読み込めない場合に元のセル内容が表示されないまま承認を求めていた不具合を修正し、読み込めない理由を表示するようにした
+- Claudeが応答している間にスラッシュコマンドを実行すると、実際の文字ではなくHTMLの特殊記号(エンティティ)が表示される不具合を修正
+- バックグラウンドで自動アップデートされた後、画面下部に「更新済み、再起動してください」という通知が表示されないことがあった不具合を修正
+- 未完了のタスクがあるセッションを再開・再起動したとき、タスク一覧(ctrl+t)を展開表示にしていても折りたたまれた状態で表示されていた不具合を修正
+- Vimモードで、詳細な会話ログの表示(ctrl+o)を開閉してもNORMALモードとカーソル位置が維持されるように修正
+- ダイアログで、矢印キーとEnterキーを素早く連続で押すと、選んだ項目ではなく直前にハイライトされていた項目が選択されてしまう不具合を修正
+- 別セッションにメッセージを送る機能(SendMessage)で、送信できないほど大きいメッセージを黙って破棄せず、送信前に拒否するよう修正
+- VSCode拡張機能で、複数のClaudeパネルを開いたウィンドウを復元・再読み込みすると、フォーカスが勝手に別のタブへ移ってしまう不具合を修正
+
+■ 変更
+- クラウド上でバックグラウンド実行される/ultrareviewや/autofix-pr実行中のメモリ・CPU使用量を改善。処理状況の表示のたびに全履歴を読み直して再描画する無駄をなくした
+- 権限確認画面を改善。表示内容と「今後確認しない」を選んだ場合に実際に許可される範囲が常に一致するようにし、内容を完全に表示できない場合は「今後確認しない」を選べないようにした
+- macOS/Linux向けに組み込まれている検索機能(grep)を改善。処理に非常に時間がかかる検索パターンを早期に打ち切ってメモリ枯渇を防止し、「-m N」オプションと「-A/-C」オプションを併用した際の前後表示件数の不具合も修正
+- 会話量が上限に達した際のエラーメッセージを改善。自動要約(auto-compact)がオフになっている場合はその旨を伝え、/configで再度オンにできることを案内するようにした
+- Remote Control機能で、claude rcコマンド実行時にも通常起動時と同じ企業向けゲートウェイの利用可否チェックを適用するように変更</div>
+<details><summary>原文リリースノート (19件)</summary><ul><li>Added an optional `spellcheck` setting that underlines misspelled words in the prompt input as you type, using your installed `aspell`, `hunspell`, or `ispell`</li>
+<li>Fixed whole-prompt-cache invalidation when a language server disconnected or reconnected mid-session</li>
+<li>Fixed nested markdown list items misaligning at depth 3+ and added a hanging indent to wrapped list items in the terminal UI</li>
+<li>Fixed prompt input highlights (slash commands, keywords, mentions) appearing shifted by one or more characters in some multi-line prompts</li>
+<li>Fixed Shift+Tab inside the permission prompt&#x27;s comment field approving the edit and granting session-wide edit permission instead of closing the field</li>
+<li>Fixed the Agent tool advertising a general-purpose default in sessions where that agent is unavailable: an omitted `subagent_type` there now gets a clear error listing the available agents</li>
+<li>Fixed notebook cell delete/replace approval dialogs silently omitting the existing cell content when the notebook or cell could not be read; the dialog now says why</li>
+<li>Fixed slash commands run while Claude is responding showing HTML entities instead of the actual characters</li>
+<li>Fixed the prompt footer not showing the &quot;Update installed&quot; restart notice after a background auto-update</li>
+<li>Fixed the expanded task list (`ctrl+t`) always starting collapsed when resuming or relaunching into a session that still has open tasks</li>
+<li>Improved memory and CPU usage while cloud sessions such as `/ultrareview` or `/autofix-pr` run in the background — their event streams are no longer re-scanned and re-rendered on every update</li>
+<li>Improved permission dialogs: display text and &quot;don&#x27;t ask again&quot; options now always match what a grant would cover, and &quot;don&#x27;t ask again&quot; is withheld when contents cannot be fully displayed</li>
+<li>Improved the embedded `grep` in native macOS/Linux builds: pathological patterns now fail fast instead of exhausting memory, and `-m N` with `-A/-C` prints correct context</li>
+<li>Improved the context-limit error to say when auto-compact is off and point to `/config` to re-enable it</li>
+<li>Vim mode: NORMAL mode and cursor position are now preserved when toggling the detailed transcript (ctrl+o) or closing a panel</li>
+<li>Dialogs: arrow keys and Enter pressed in quick succession now select the option you navigated to instead of the previously highlighted one</li>
+<li>`SendMessage` now refuses messages too large for cross-session delivery up front instead of silently dropping them</li>
+<li>Remote Control: `claude rc` now applies the same enterprise-gateway availability check as interactive startup</li>
+<li>[VSCode] Fixed focus jumping between open Claude tabs on its own when a window with several Claude panels is restored or reloaded</li></ul></details>
+</article>
+<article>
+<h2>v2.1.234 <span class="date">2026-08-17</span></h2>
 <div class="summary">【概要】
 使用量上限後の自動再開やGitLab連携を追加し、権限確認や入力操作の不具合を多数修正しました。
 
