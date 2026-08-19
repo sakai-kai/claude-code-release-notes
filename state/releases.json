@@ -1,6 +1,46 @@
 {
-  "last_version": "2.1.235",
+  "last_version": "2.1.236",
   "releases": [
+    {
+      "version": "2.1.236",
+      "notes": [
+        "Added `ANTHROPIC_DEFAULT_MODEL` environment variable: sets the model new sessions start on, while a `/model` pick still overrides it and persists across restarts (unlike `ANTHROPIC_MODEL`)",
+        "Added `notify_when_idle` to cross-session `SendMessage`: ask another Claude Code session on this machine to send one notice when it next goes idle — opt-in, one-shot, no polling (macOS and Linux)",
+        "Sandbox: on macOS, wildcard read-deny rules (e.g. `**/.env`) now take precedence inside allowed read regions, cover matched directories' contents, and can't be bypassed by renaming the denied file",
+        "Fixed clipboard copy, background housekeeping, background sessions, and local MCP logs breaking after the directory a session had switched into was removed (since 2.1.229)",
+        "Fixed the fullscreen renderer failing permanently after a single failed start: it now falls back to the classic renderer instead of exiting on every subsequent launch",
+        "Fixed the `/model` picker rendering taller than the terminal: it now shows only as many models as fit the window, with the rest reachable by scrolling",
+        "Fixed `SendMessage` calls being rejected when a malformed closing tag left the message text inside the summary field",
+        "Fixed unhandled promise rejections when a subprocess fails to start, for example `powershell.exe` on WSL with Windows interop disabled (regression in 2.1.234)",
+        "Fixed fullscreen mode sometimes not showing a newly sent message until the next update after the terminal was resized",
+        "Fixed a blank band that could remain above the prompt after clearing a multi-line prompt, and panes not repainting after resizing the terminal away and back, in fullscreen mode",
+        "Fixed the managed-settings approval prompt sometimes not appearing at startup while still capturing the first keypress as approval",
+        "Fixed terminal tab titles jumping in tmux (iTerm tmux integration): the title is now written only when its text changes instead of animating every 960ms",
+        "Fixed an unclear error when the cloud environments list came back empty or malformed",
+        "Fixed the Fable 5 first-time usage-credits prompt auto-selecting the fallback model after 60 seconds with no answer when using Remote Control",
+        "Fixed spinner tips never appearing, with a repeated background error, when the cached guest-pass reward in `~/.claude.json` was malformed",
+        "Fixed skills hot-reload in SDK/VS Code sessions raising an error on every skills change after the session's working directory was deleted (2.1.229+)",
+        "Fixed self-hosted runner sessions released on idle, retire, or startup timeout occasionally resuming on another runner before the post-session hook had finished",
+        "Fixed the Clawd mascot's eyes and feet rendering unevenly in iTerm2 at some font sizes",
+        "Fixed occasional runaway session recaps: recap text (automatic and `/recap`) is now capped at 400 characters, cut at a word boundary",
+        "Improved startup performance: the session counter is now written in the background",
+        "Improved auto mode: `Monitor` allow rules are now set aside while auto mode is active, so Monitor commands are reviewed the same way Bash commands are",
+        "Improved auto mode on Bedrock, Vertex AI, and Foundry, and when telemetry is disabled: the classifier now uses the same defaults as on the Claude API, including severity-scored classification",
+        "Improved auto mode: the git status check can no longer be fooled by a repo's `status.showUntrackedFiles=no` setting into reporting a clean tree",
+        "Changed the `/model` picker to highlight only the newest model's name, so the highlight marks the new release rather than an arbitrary subset of the list",
+        "`/goal`: an idle session whose goal is parked behind long-running background work now checks in automatically after 30 minutes (then 1h, 2h) instead of waiting for you to return",
+        "`/usage` now shows the usage-credits spend row for Team and Enterprise members, and shows a capped row at 0% before anything is spent",
+        "SIGTERM in print/SDK mode no longer records an interrupted turn or synthetic tool denials before exiting; running commands are still terminated and the process still exits with code 143",
+        "Pressing Enter on a slash-command typo or a command unavailable in this session now reports it instead of running the closest fuzzy match; prefixes and aliases still run",
+        "Remote Control now marks a session offline within seconds when the CLI exits or its terminal closes",
+        "`SendMessage` now refuses further messages to a session up front once a rapid burst would exceed what that session's inbox accepts, instead of reporting them sent while they were dropped",
+        "Aligned the session title chip on the prompt border with the footer's right edge",
+        "Right-aligned footer items (goal indicator, session state, background agent status) and truncated notices now share a consistent right margin with the rest of the prompt area",
+        "[VSCode] Added screen reader support for the transcript: live announcements for replies, permission requests, errors, and status changes, plus per-turn heading navigation"
+      ],
+      "summary_ja": "【概要】\nサンドボックスの安全性向上、フォルダ削除時の不具合、フルスクリーン表示の不具合などを修正した安定性重視のアップデートです。\n\n【重要】\n- サンドボックスの安全性向上: macOSで、特定のファイル(例: .envなど)を読み取り禁止にする設定が、許可された範囲内でも確実に効くようになり、ファイル名を変更しても回避できなくなりました。(影響: サンドボックス機能で秘密情報を含むファイルへのアクセスを制限している人)\n- フォルダ削除時の不具合: 作業中のフォルダを削除すると、クリップボードへのコピーや裏側での定期処理、バックグラウンドセッション、MCP連携のログ記録が壊れる不具合を修正しました。(影響: 作業中にフォルダを移動・削除したり、バックグラウンドでセッションを動かしている人)\n- フルスクリーン表示の不具合: フルスクリーン表示の起動に一度失敗すると、それ以降ずっと通常の画面に戻せなくなっていた不具合を修正しました。(影響: フルスクリーン表示でClaude Codeを使っている人)\n\n【詳細】\n\n■ 新機能\n- 環境変数「ANTHROPIC_DEFAULT_MODEL」を追加。新しいセッションを開始する際に使うモデルを指定でき、/modelコマンドで別のモデルを選んだ場合はその選択が優先され、再起動後も維持されます(ANTHROPIC_MODELとは異なる動作です)。\n- 同じパソコン上の別のClaude Codeセッションに、次に作業が止まった(アイドル状態になった)タイミングで一度だけ通知を送るよう依頼できるようになりました(SendMessageのnotify_when_idle)。ポーリング不要で、明示的に指定したときだけ動作します(macOSとLinux対応)。\n- /goalで設定した目標が長時間のバックグラウンド処理の裏で止まったままになっているとき、以前は利用者が戻るまで待っていましたが、30分後、1時間後、2時間後と自動的に進捗確認するようになりました。\n- [VSCode] 画面読み上げソフト向けに、返信・許可確認・エラー・状態変化をその都度読み上げる機能と、やり取りごとに見出しで移動できる機能を追加しました。\n\n■ 修正\n- フォルダ削除時の不具合: 作業中のフォルダを削除すると、クリップボードへのコピー、裏側での定期処理、バックグラウンドで動かしているセッション、ローカルのMCP連携のログ記録が壊れてしまう不具合を修正(2.1.229以降で発生)。\n- フルスクリーン表示の不具合: フルスクリーン表示の起動に一度失敗すると、それ以降ずっと起動できなくなっていた不具合を修正。失敗時は通常表示に自動的に切り替わるようになりました。\n- /modelのモデル選択画面が画面の高さより縦に長く表示されてしまう不具合を修正。表示しきれない分はスクロールで見られるようになりました。\n- メッセージの末尾タグが壊れていると、SendMessageでのメッセージ送信が拒否されてしまう不具合を修正。\n- powershell.exeなど、裏側で使うプログラムの起動に失敗したときにエラーが処理されずアプリが不安定になることがあった不具合を修正(WSLでWindows連携が無効な場合など、2.1.234で発生した不具合)。\n- フルスクリーン表示で、端末の画面サイズを変更した直後に新しく送ったメッセージがすぐ表示されないことがあった不具合を修正。\n- フルスクリーン表示で、複数行の入力欄を消したあとに空白が残ったり、画面サイズを変えて戻すと表示が崩れたままになることがあった不具合を修正。\n- 管理者が設定した承認確認画面が起動時に表示されないのに、最初のキー入力だけは承認として扱われてしまう不具合を修正。\n- tmux(iTerm連携)使用時、タブのタイトルが約960ミリ秒ごとに書き換えられて安定しなかった不具合を修正。タイトルの文字が変わったときだけ更新するようにしました。\n- クラウド上の実行環境の一覧が空または壊れたデータで返ってきたときに、わかりにくいエラーが出ていた不具合を修正。\n- Remote Control使用時、Fable 5を初めて使う際のクレジット消費確認で60秒応答がないと自動的に代替モデルが選ばれてしまっていた不具合を修正。\n- 保存されているゲストパス特典の情報が壊れていると、起動時のヒント表示が出なくなり、裏側でエラーが繰り返し発生していた不具合を修正。\n- SDKやVS Code拡張のセッションで、作業フォルダが削除された状態でスキルの内容が変更されると、変更のたびにエラーが出ていた不具合を修正(2.1.229以降で発生)。\n- セルフホスト型の実行環境で、アイドル・停止・起動タイムアウトによりセッションを解放したあと、終了処理が終わる前に別の実行環境で再開されてしまうことがあった不具合を修正。\n- 自動生成される作業の要約(自動要約および/recapコマンド)が、まれに際限なく長くなることがあった不具合を修正。文字数を400文字までとし、単語の区切りで切るようにしました。\n- その他、マスコットキャラクターの表示崩れや画面の余白のずれなど、細かい表示上の不具合を修正。\n\n■ 変更\n- サンドボックスの安全性向上: macOSのサンドボックス機能で、特定パターンに一致するファイル(例: .env)を読み取り禁止にする設定が、許可された範囲の中でも優先され、対象フォルダの中身にも適用され、ファイル名を変更しても回避できないようにしました。\n- 起動処理を高速化: セッション数を記録する処理をバックグラウンドで行うようにしました。\n- 自動モード(auto mode)使用中は、Monitor機能の実行許可設定が一時的に無視され、Bashコマンドと同様に確認が行われるようになりました。\n- Bedrock、Vertex AI、Foundry利用時、およびテレメトリを無効にしている場合の自動モードが、Claude API利用時と同じ判定基準(深刻度に応じた判定を含む)を使うようになりました。\n- 自動モードのgit状態チェックが、リポジトリのstatus.showUntrackedFiles=no設定によって「変更なし」と誤判定されることがなくなりました。\n- /modelのモデル選択画面で、最新モデルの名前だけがハイライトされるようになりました(以前は一覧の一部が紛らわしくハイライトされていました)。\n- /usageに、TeamおよびEnterpriseプランの利用者向けにクレジット消費状況の行が表示されるようになりました。消費前は0%として表示されます。\n- print/SDKモードでSIGTERMを受けた場合、途中で中断した扱いの記録や、実行されなかったツールの記録を残さなくなりました(実行中のコマンドは引き続き終了し、終了コード143で終了します)。\n- スラッシュコマンドの入力ミスや、そのセッションで使えないコマンドを実行しようとした場合、似た名前のコマンドを代わりに実行せず、エラーとして知らせるようになりました(前方一致や別名でのコマンド実行は引き続き可能です)。\n- Remote Control使用時、CLIの終了や端末を閉じた場合に、数秒以内にセッションがオフライン表示に切り替わるようになりました。\n- SendMessageで短時間に大量のメッセージを送ろうとした場合、送信済みとして扱いながら実際には届いていない、という状態を避けるため、あらかじめ送信を拒否するようになりました。",
+      "detected_at": "2026-08-19T22:09:39+00:00"
+    },
     {
       "version": "2.1.235",
       "notes": [
