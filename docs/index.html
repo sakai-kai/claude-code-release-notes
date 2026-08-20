@@ -45,10 +45,106 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-20 03:32 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-20 22:13 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.237 <span class="badge">NEW</span> <span class="date">2026-08-20</span></h2>
+<h2>v2.1.238 <span class="badge">NEW</span> <span class="date">2026-08-20</span></h2>
+<div class="summary">【概要】
+メモリ増加やRemote Control関連の不具合を修正し、実行環境やプラグイン向けの認証機能を追加。
+
+【重要】
+- 長時間の対話セッションでメモリ使用量が際限なく増え続ける不具合を修正(影響: サブエージェントを使って長時間セッションを続けるユーザー)
+- カスタムの出力スタイルがセッション途中でデフォルトの口調に戻ってしまう不具合を修正(影響: プロジェクトやプラグインでカスタム出力スタイルを設定しているユーザー)
+- フルスクリーン時にCtrl+L/Cmd+Kを2回押すと`/clear`が実行される仕様を廃止(影響: ターミナルでClaude Codeを日常的に使うユーザー)
+
+【詳細】
+
+■ 新機能
+- キーバインド設定に「readline」モードを追加。設定すると、プロンプト入力中のCtrl+Wで直前の空白まで一気に削除される(Bashと同じ動作)。デフォルト(classic)の挙動は変わらない
+- プラグインの配布元(マーケットプレイス)の設定で、URLで指定した配布元やカタログの各項目に「headersHelper」を指定できるようになった。これはカタログやアーカイブの取得時に、短期間だけ有効なトークンなどのHTTPヘッダーを生成するコマンドを実行する仕組み
+- カタログの各項目に設定したheadersHelperは、そのプラグインをインストール・更新するときだけ、内容を表示したうえで実行されるようになった。`claude plugin install/update`実行時は確認(y/N)が入るようになった(-yオプションで省略可)
+- `claude self-hosted-runner`に`--defer-shutdown-max-min &lt;分数&gt;`オプションを追加。終了シグナルを受け取っても、指定時間は接続中のセッションを提供し続けてから終了するようになった
+- `claude self-hosted-runner`に`--proxy-authorization-command`/`--proxy-authorization-file`オプションを追加。接続のたびに新しい認証情報(Proxy-Authorizationヘッダー)の発行を求める中継サーバー(プロキシ)経由の通信に対応
+
+■ 修正
+- 長時間の対話セッションでメモリ使用量が際限なく増え続ける不具合を修正。サブエージェントの実行結果が画面に表示されなくなった後もメモリに残り続けていた
+- カスタムの出力スタイルがセッション途中でデフォルトの口調に戻ってしまう不具合を修正。プロジェクトやプラグインで設定したものも対象
+- 環境変数`CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=true`を設定していても、利用量の上限に近づく(まだ超えていない)と入力候補の提案が表示されなくなる不具合を修正
+- 変更内容を分離した作業用ディレクトリ(worktree)を使う機能で、リダイレクトを含まないコマンドにも「リダイレクトを削除してください」という誤った拒否メッセージが出る不具合を修正
+- 自分のマシンで動かす実行環境(セルフホストランナー)が、応答の一瞬の遅れや通信の途切れだけでサーバー側から切り離され、動作中のセッションが別の実行環境に奪われてしまう不具合を修正
+- MCP連携の確認ダイアログが、URLが4096文字を超えると何も表示されなくなる不具合と、プロジェクトのパスが長く画面に収まらないとき許可プロンプトから「今後確認しない」の選択肢が消える不具合を修正
+- Bashコマンドが強制終了・タイムアウト・中断された際に、`/tmp/claude-*-cwd`という一時ファイルが削除されずに残ってしまう不具合を修正
+- 通信の遅い接続(低速なSSH/mosh)で入力が一度に大量に届いた場合、BackspaceキーをCtrl+Hとして送る端末で、長押ししたBackspaceが効かなくなることがある不具合を修正
+- 許可を求める確認画面の差分表示で、絵文字などの幅広い文字やタブ文字を含む行が途中で切れてしまう不具合を修正
+- 一時停止(Ctrl+Z)したセッションを終了した際、まれに端末がペースト時の特殊表示モードのままになりカーソルが消えてしまう不具合を修正
+- 標準入出力で動くMCPサーバーが、接続開始の合図(initialize)より前に一覧取得の要求(server/discover)を受け取ってしまい、遅延起動を想定したサーバーが毎回のセッション開始時にバックエンドを起動してしまう不具合を修正
+- 中継サーバー(プロキシ)が接続を拒否した際に、原因不明の通信エラーとしか表示されず、どのプロキシが拒否したか分からない不具合を修正
+- プロンプトキャッシュ(直前のやり取りを再利用する仕組み)がすでに期限切れの場合でも、`/model`や`/effort`実行時に「キャッシュが効かなくなる」という警告が表示されてしまう不具合を修正
+- Remote Control(スマートフォンやWebから操作する機能)のタスク一覧画面から個別タスクを停止しても、CLIで動いているセッションには反映されない不具合を修正
+- クライアントから送信者情報(ロール)が正しく設定されていないメッセージが届くと、Remote Controlのリモートセッションが終了してしまう不具合を修正
+- `claude remote-control`で起動したRemote Controlセッションが、起動時のシェルの環境変数(セッション限定のもの)を引き継いでしまう不具合を修正
+- Remote Controlセッションの内部プロセスが異常終了すると、`claude remote-control`を再起動するまで使えなくなる不具合を修正。次にメッセージを送った時点で再利用されるようになった
+- Claudeが応答生成中にWebやデスクトップアプリからRemote Control経由でメッセージを送ると、応答完了後にそのメッセージが会話記録から消えてしまう不具合を修正
+- スマートフォンやWebでモデルを切り替えても、ターミナル側の表示に反映されない不具合を修正
+- 一時的な通信の不調でログイン状態の更新が遅れた際に、Remote Controlが「ログインの有効期限切れ」として切断してしまう不具合を修正。再試行して接続を維持するように改善
+- サインアウトした際、Remote Controlが「再接続に失敗した」という紛らわしい表示になっていた不具合を修正。分かりやすいメッセージでセッションを終了するように変更
+- サーバーモード(`claude remote-control`)やデスクトップ/IDE上のセッションで`ListAgents`/`SendMessage`を使うと「Remote Controlに接続されていません」と表示される不具合を修正。Remote Control経由の相手も一覧・送信できるようになった
+- 次のバックグラウンドセッションに備えて事前に準備されている待機中のワーカーが、タスクに割り当てられる前から`ListAgents`/`SendMessage`に表示されてしまう不具合を修正
+- 同じマシン内の別セッションへメッセージを送る機能で、送信を拒否する設定(`crossSessionInbound: &quot;refuse&quot;`)の相手に送った場合、これまでは送信できたように見えていたが、正しく「拒否されました」と表示するよう修正
+- 同じマシン内の別セッションへメッセージを送る機能で、相手の受信件数が上限に達っている等の理由でメッセージが破棄された場合、これまでは何も表示されず消えていたが、送信元に通知するよう修正
+
+■ 変更
+- macOSで`claude`とだけ入力して起動する場合の起動時間を短縮
+- zsh特有の条件分岐構文に対するBashツールの許可判定を改善
+- Remote Controlの接続維持を改善。ネットワークの境界やVPN、プロキシなどで一時的に接続が拒否(HTTP 403)されても最大3分間は待機して接続を保つようになり、拒否が続く場合は原因となっている相手を表示するように
+- 起動時の自動アップデート確認を、起動直後ではなく起動から約10秒後に実行するよう変更し、起動処理と競合しないように改善
+- 同梱の`claude-api`スキルを、Managed Agentsの2026年8月19日リリースに合わせて更新。Web検索・取得のドメイン制限や、自分のマシンで動かすサンドボックス環境でのメモリ保存に対応
+- フルスクリーン時のCtrl+LとCmd+Kの動作を変更。常に画面の再描画のみを行うようにし、2回連続で押すと`/clear`が実行される仕様を廃止。高さ1行のnvim端末などで意図せず`/clear`が繰り返し実行される問題も解消
+- `claude mcp list`と`claude mcp get`で、無効化したMCPサーバーは接続確認をせずに「無効」と表示するように変更
+- プロジェクトの`.mcp.json`に設定したheadersHelperや、プロジェクト・追加ディレクトリのエージェント設定ファイルに直接書かれたMCPサーバーは、そのフォルダの信頼確認が済んでいないと使えないように変更(`claude -p`実行時も対象)
+- プロジェクトの`.mcp.json`やプラグイン、エージェント設定ファイルのheadersHelperは、認証情報を含む環境変数を引き継がずに実行されるように変更。ユーザー単位・管理者単位・claude.ai向けのheadersHelperはClaudeの設定ディレクトリから実行されるように変更</div>
+<details><summary>原文リリースノート (39件)</summary><ul><li>Added a `keybindingFlavor` setting: set it to `&quot;readline&quot;` to make Ctrl+W in the prompt delete back to the previous whitespace, as in Bash; the default (`&quot;classic&quot;`) is unchanged</li>
+<li>Plugin marketplaces: `headersHelper` on a url marketplace or a catalog entry runs a command that mints HTTP headers (e.g. a short-lived token) for catalog and same-origin archive fetches</li>
+<li>A catalog entry&#x27;s `headersHelper` runs only when you install or update that plugin, after its command is shown; `claude plugin install/update` ask `[y/N]` (or pass `-y`)</li>
+<li>Added `claude self-hosted-runner --defer-shutdown-max-min &lt;minutes&gt;`: on SIGTERM, keep serving attached sessions, park what is left after that many minutes, then exit</li>
+<li>Added `claude self-hosted-runner --proxy-authorization-command` / `--proxy-authorization-file` for egress proxies that require a freshly issued `Proxy-Authorization` header on every connection</li>
+<li>Fixed unbounded memory growth in long interactive sessions: subagent tool results are now released once they leave the recent display window</li>
+<li>Fixed custom, project, and plugin output styles drifting back to the default voice mid-session</li>
+<li>Fixed `CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=true` not keeping prompt suggestions on when your account is near, but not over, its usage limit</li>
+<li>Fixed worktree-isolation Bash refusals telling you to remove a redirect when the command had none</li>
+<li>Fixed self-hosted runners occasionally being removed by the server after a single slow or lost poll request, handing their healthy session to another runner</li>
+<li>Fixed MCP elicitation dialogs showing nothing for URLs longer than 4,096 characters, and permission prompts dropping the &quot;don&#x27;t ask again&quot; option when the project path didn&#x27;t fit the terminal width</li>
+<li>Fixed leftover `/tmp/claude-*-cwd` files when a Bash command is killed, times out, or is interrupted</li>
+<li>Fixed held Backspace being ignored on terminals that send Ctrl+H for Backspace when keystrokes arrive in large bursts (slow SSH/mosh links)</li>
+<li>Fixed text-wrapping in permission prompt diffs: lines containing wide multi-code-point characters (such as emoji) or tabs are no longer clipped</li>
+<li>Fixed killing a suspended (Ctrl+Z) session sometimes leaving the terminal in bracketed-paste mode with the cursor hidden</li>
+<li>Fixed stdio MCP servers receiving a `server/discover` request before `initialize`, forcing lazy servers to start their backend on every session open</li>
+<li>Fixed a proxy&#x27;s refusal of a connection being reported as a generic network error instead of naming the proxy</li>
+<li>Fixed the `/model` and `/effort` cache-miss warning appearing when the prompt cache had already expired</li>
+<li>Fixed per-task Stop from the Remote Control tasks panel doing nothing on CLI-hosted sessions</li>
+<li>Fixed remote sessions exiting when a client delivered a user message without a valid role</li>
+<li>Fixed Remote Control sessions started by `claude remote-control` inheriting session-scoped environment variables from the launching shell</li>
+<li>Fixed a Remote Control session whose process crashed staying unavailable until `claude remote-control` was restarted; it can now be reused when you next message it</li>
+<li>Fixed Remote Control messages sent from the web or Desktop while Claude is mid-turn disappearing from the transcript after the turn finishes</li>
+<li>Fixed Remote Control model picks made on a phone or web not updating the model shown in the terminal</li>
+<li>Fixed Remote Control disconnecting with &quot;login expired&quot; when a brief network hiccup delays renewing your sign-in; it now retries and stays connected</li>
+<li>Fixed Remote Control reporting a failed reconnect on sign-out; signing out now ends the session with a clear message</li>
+<li>Fixed `ListAgents`/`SendMessage` reporting &quot;Remote Control is not connected&quot; in sessions run by `claude remote-control` (server mode) or Desktop/IDE hosts; they now list and reach Remote Control peers</li>
+<li>Fixed `ListAgents` and `SendMessage` exposing the idle worker that the agent view pre-warms for your next background session; it now appears only once a task claims it</li>
+<li>Cross-session messaging: sending to a session on this machine that refuses inbound messages (e.g. `crossSessionInbound: &quot;refuse&quot;`) now reports &quot;refused&quot; to the sender instead of a silent success</li>
+<li>Cross-session messaging: a session whose inbox drops your messages (rate limit or full queue) now tells your session, instead of the messages vanishing silently</li>
+<li>Improved startup: bare `claude` starts sooner on macOS</li>
+<li>Improved Bash tool permission checking for zsh-specific syntax in shell conditionals</li>
+<li>Improved Remote Control connection resilience: brief HTTP 403 refusals from a network edge, VPN, or proxy are now tolerated for up to 3 minutes, with the refusing party named when a block persists</li>
+<li>Improved startup responsiveness: the automatic update check now runs about 10 seconds after launch instead of competing with startup for CPU</li>
+<li>Updated the bundled `claude-api` skill for the Managed Agents Aug 19 release: web search/fetch domain settings and memory stores on self-hosted sandboxes</li>
+<li>Changed Ctrl+L and Cmd+K in fullscreen to always just repaint — the double-press `/clear` shortcut was removed, and 1-row nvim terminals no longer trigger automatic `/clear` loops</li>
+<li>Changed `claude mcp list` and `claude mcp get` to show disabled servers as `⊘ Disabled` instead of connecting to them for a health check</li>
+<li>MCP `headersHelper` in a project `.mcp.json`, and inline MCP servers in project or `--add-dir` agent files, now require that folder&#x27;s trust dialog to have been accepted (also under `claude -p`)</li>
+<li>MCP `headersHelper` from a project `.mcp.json`, plugin, or agent file runs without inherited credential env vars; user, managed and claude.ai-scope helpers now run from the Claude config dir</li></ul></details>
+</article>
+<article>
+<h2>v2.1.237 <span class="date">2026-08-20</span></h2>
 <div class="summary">【概要】
 独自の接続設定を使う環境でのキャッシュ不具合を修正し、前置きを省く「簡潔」な応答スタイルを追加。
 
