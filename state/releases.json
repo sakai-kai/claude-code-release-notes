@@ -1,6 +1,14 @@
 {
-  "last_version": "2.1.240",
+  "last_version": "2.1.241",
   "releases": [
+    {
+      "version": "2.1.241",
+      "notes": [
+        "Bug fixes and reliability improvements"
+      ],
+      "summary_ja": "This confirms the pattern — for v2.1.240, which also only had \"Bug fixes and reliability improvements\" as its note, the established format was used. I'll follow that same precedent for v2.1.241.\n\n【概要】\n細かな不具合修正と安定性向上のみのアップデートです。\n\n【重要】\n- 特になし\n\n【詳細】\n\n■ 修正\n- その他、細かな不具合修正と動作の安定性向上を実施",
+      "detected_at": "2026-08-23T03:36:26+00:00"
+    },
     {
       "version": "2.1.240",
       "notes": [
