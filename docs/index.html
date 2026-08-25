@@ -45,10 +45,24 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-25 03:37 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-25 22:10 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.243 <span class="badge">NEW</span> <span class="date">2026-08-25</span></h2>
+<h2>v2.1.245 <span class="badge">NEW</span> <span class="date">2026-08-25</span></h2>
+<div class="summary">【概要】
+Arch LinuxやFedora Rawhideなど、特定のLinux環境で起動時にクラッシュしていた問題を修正。
+
+【重要】
+- 特定のLinuxディストリビューション(Arch Linux、CachyOS、Fedora Rawhideなど)で新しいシステムの基盤ライブラリ(glibc 2.44)を使っていると、起動時にクラッシュしていた問題を修正(影響: これらのLinux環境でClaude Codeを使っている人)
+
+【詳細】
+
+■ 修正
+- 特定のLinuxディストリビューション(Arch Linux、CachyOS、Fedora Rawhideなど)で新しいシステムの基盤ライブラリ(glibc 2.44)を使っていると、起動時にクラッシュしていた問題を修正</div>
+<details><summary>原文リリースノート (1件)</summary><ul><li>Fixed a crash on startup on Linux distributions that ship glibc 2.44 (for example Arch Linux, CachyOS and Fedora Rawhide)</li></ul></details>
+</article>
+<article>
+<h2>v2.1.243 <span class="date">2026-08-25</span></h2>
 <div class="summary">【概要】
 起動の高速化とインストールサイズの削減、応答なし時の自動タイムアウトなど、使い勝手と安定性を強化する更新。
 

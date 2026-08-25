@@ -1,6 +1,14 @@
 {
-  "last_version": "2.1.243",
+  "last_version": "2.1.245",
   "releases": [
+    {
+      "version": "2.1.245",
+      "notes": [
+        "Fixed a crash on startup on Linux distributions that ship glibc 2.44 (for example Arch Linux, CachyOS and Fedora Rawhide)"
+      ],
+      "summary_ja": "【概要】\nArch LinuxやFedora Rawhideなど、特定のLinux環境で起動時にクラッシュしていた問題を修正。\n\n【重要】\n- 特定のLinuxディストリビューション(Arch Linux、CachyOS、Fedora Rawhideなど)で新しいシステムの基盤ライブラリ(glibc 2.44)を使っていると、起動時にクラッシュしていた問題を修正(影響: これらのLinux環境でClaude Codeを使っている人)\n\n【詳細】\n\n■ 修正\n- 特定のLinuxディストリビューション(Arch Linux、CachyOS、Fedora Rawhideなど)で新しいシステムの基盤ライブラリ(glibc 2.44)を使っていると、起動時にクラッシュしていた問題を修正",
+      "detected_at": "2026-08-25T22:10:20+00:00"
+    },
     {
       "version": "2.1.243",
       "notes": [
