@@ -45,10 +45,148 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-23 03:36 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-25 03:37 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.241 <span class="badge">NEW</span> <span class="date">2026-08-23</span></h2>
+<h2>v2.1.243 <span class="badge">NEW</span> <span class="date">2026-08-25</span></h2>
+<div class="summary">【概要】
+起動の高速化とインストールサイズの削減、応答なし時の自動タイムアウトなど、使い勝手と安定性を強化する更新。
+
+【重要】
+- 起動処理を高速化し、インストール・自動更新時のダウンロードサイズを大幅に削減(影響: 日常的にClaude Codeを使うすべての人)
+- APIから応答が返らないままセッションが10分以上無反応になる不具合を修正し、約3分でタイムアウトして再試行するようにした(影響: 応答なしで操作が止まって困っていた人)
+- auto mode使用中、APIが混雑した際にツール呼び出しが一時的に拒否されてしまう不具合を修正(影響: auto modeを使っている人)
+
+【詳細】
+
+■ 新機能
+- /usage に「Loops」の内訳を追加。/loopで繰り返し実行しているタスクごとの実行回数・合計トークン数・1回あたりのトークン数・最終実行日時が確認でき、無駄に消費しているタスクを見つけやすくなった
+- /model の選択肢一覧を組織側で自由に組み替えられる設定(modelPicker)を追加。表示するモデルの並び順や名前を指定したり、標準の一覧を独自のものに置き換えたりできる
+- 会話全体でのキャッシュ保持時間を1時間に保ちつつ、サブエージェント(補助的に呼び出されるAI)は5分のままにできる設定(promptCacheTtl、subagentPromptCacheTtl)を追加。APIキー利用者やクラウド経由の利用者向け
+- 組織ごとに契約しているモデル単価や割引率を/costやステータスバー、利用状況の記録に反映できる設定(modelPricing)を追加。定価ではなく実際の契約料金で表示されるようになった
+- /login からAnthropic ConsoleアカウントでAPIキーを発行せずにサインインできる方法を追加。APIキーの発行を許可していない組織向け
+- /status に、より優先度の高い管理設定が適用されているため反映されなかった設定ファイル(managed-settings.jsonなど)を一覧表示する「Skipped sources」欄を追加
+- /mcp と /plugins で、claude.aiの接続先のうち認証を組織側が管理しているものに「managed」の目印を追加
+- claude.aiでGitHubをまだ連携していないユーザーに、/web-setup を案内するヒントを追加
+- /status に、Claude Code on the web(Pro/Maxプラン向け)でGitHub連携が済んでいるかを表示する行を追加。未連携の場合は/web-setupを案内
+- /tasks とエージェント詳細画面に、各サブエージェントがどのモデル・どの思考の強さ(effortレベル)で実行されたかを表示するようにした
+
+■ 修正
+- 対話なしで実行する場合(-pオプション)やSDK経由のセッションで、外部のMCPサーバーとの接続が一度切れると復旧しなかった不具合を修正。今は自動的に再接続するか、失敗したことが分かるようになった
+- Linearなど一部のMCPサーバーで、デスクトップアプリからサインインすると「Invalid redirect URI」エラーになっていた不具合を修正
+- 起動時にauto modeが一時的に使えない状態としてキャッシュされたまま、その後の確認にも失敗すると使えないままになっていた不具合を修正
+- auto mode使用中、APIが一時的に混雑して再試行を求めてきた際、約1分待った後にツール呼び出しが「一時的に利用できません」と拒否されてしまっていた不具合を修正
+- /model の選択画面でUltracodeを選んでも無視されていた不具合を修正。選択すると現在のセッションに反映されるようになった
+- /resume で直近50件のセッションしか一覧に出ず、それより古いものを選べなかった不具合を修正。スクロールするとさらに読み込まれるようになった
+- クラウド上のセッションが処理の途中で再起動した際、保留中だったフック(=特定の操作の前後に自動実行される処理)やバックグラウンドタスクの完了通知が、通常の続きの案内ではなく入力メッセージとして扱われてしまっていた不具合を修正
+- 一部の権限が制限された環境(ユーザー名前空間やroot権限を使わないコンテナ)で、セッション間のメッセージ送受信が2.1.232のセキュリティ強化以降、気づかないまま無効になっていた不具合を修正
+- 画面の別の場所が再描画されたときに、画面端からはみ出す文字列(/loginのサインインURLなど)の先頭部分が消えてしまっていた不具合を修正
+- 絵文字の直後に打った誤字にスペルチェックの下線が付かなかった不具合を修正
+- バックグラウンドで動くサブエージェントが、最後に残っていたバックグラウンドのBash処理の完了時に再開しないことがあった不具合を修正
+- APIから応答が返らないままセッションが10分以上無反応になる不具合を修正。約3分でタイムアウトして1回再試行し、それでも応答がなければ「API Error: No response from API」と表示するようにした
+- 認証エラーやモデルが利用できない場合などのエラーメッセージが、AIからの回答のように表示されてしまっていた不具合を修正
+- CI(自動テスト・ビルド環境)でのID連携において、同じジョブ内の複数プロセスがそれぞれ交換用トークンを使い切ってしまっていた不具合を修正。トークン交換に失敗した場合はサーバーのエラー内容がすぐ表示されるようになった
+- ログイン直後に開始したセッションで、組織からのお知らせ(companyAnnouncements)が起動時に表示されないことがあった不具合を修正(/logout後の初回起動時など)
+- `Bash(cat *)` のようなフックの実行条件が、コマンド置換(`$()`やバッククォート)を含む無関係なBashコマンドでも誤って発動していた不具合を修正
+- marketplaceフィールドで依存関係を指定したプラグイン同士を --plugin-dir で読み込んだ場合に、依存関係が解決されなかった不具合を修正
+- 最後のLSPプラグイン(コード解析支援の拡張)を無効にしても /reload-plugins 後にLSP用のツールが残ってしまっていた不具合を修正。会話内容を読み直すことになるLSPプラグインの変更時には事前に警告するようにもした
+- --agents オプションに不正なJSONや無効なエージェント定義を渡してもそのまま無視されていた不具合を修正。--mcp-config同様、分かりやすいエラーで終了するようになった
+- ~/.claude.json 内のMCPサーバー設定が不正なとき、/status が「Found invalid entries in: .」とだけ表示しファイル名が分からなかった不具合を修正
+- /clear を実行すると /rename で付けたセッション名が入力欄の表示から消えていた不具合を修正(名前自体は新しいセッションにも引き継がれていた)
+- ~/.claude/history.jsonl に壊れた行があると、Ctrl+Rでの履歴検索や上矢印キーでの履歴呼び出しが動かなくなっていた不具合を修正
+- 修飾キーの送り方が特殊な一部のターミナル(modifyOtherKeysやkitty protocol対応)で、Ctrl+[ を押してもvimのINSERTモードから抜けられなかった不具合を修正
+- NO_PROXYに小文字の no_proxy ではなく localhost とだけ書いていた場合、IDEとの接続がHTTPS_PROXY経由になり失敗することがあった不具合を修正。大文字小文字どちらの指定でも効くようになった
+- 通信を制限する仕組み(サンドボックス)に引っかかったコマンドが終了コードとしては成功(0)を返す場合(例: curlがプロキシの403ページを表示して終了するなど)に、制限された通信の詳細情報がBashツールの結果から失われていた不具合を修正
+- レート制限のウィンドウがリセットされた後も、セッションを操作しないままだとステータスバーのrate_limits表示や/usageがリセット前の古い使用率を表示し続けていた不具合を修正
+- claude --teleport で未コミットの変更があるとそのまま終了してしまっていた不具合を修正。セッション選択画面と同様に、変更を一時退避(stash)して続行するか選べるようになった
+- 古いバージョンのGitHub CLI(gh auth token非対応)で既にログイン済みの場合でも、/web-setup が繰り返しログインを求めてきた不具合を修正
+- 自動更新で古いバージョンの関連ファイルが削除された際、Claude in Chrome拡張がClaude Codeとの接続を失っていた不具合を修正。常に最新の claude 起動コマンド経由で接続されるようになった
+- [VSCode] インストール直後など機能フラグの取得前にセッションを開始すると、auto modeや設定した既定の権限モードではなく初期設定のモードで開いてしまっていた不具合を修正
+- [VSCode] Focusビューで自分で開いた項目が、サブエージェントの動作中に勝手に折りたたまれてしまっていた不具合を修正
+- claude remote-control が、接続先サーバー側で実行環境が失われた際に終了してしまい、接続していたRemote Controlセッションが使えなくなっていた不具合を修正。今は自動的に復旧する
+- 管理者・オーナー権限を持たないTeam/Enterpriseメンバーが claude remote-control を停止・再起動した場合、Remote Controlセッションが動かなくなることがあった不具合を修正
+
+■ 変更
+- 起動処理を高速化。サンドボックス(実行環境を制限する仕組み)やMCPサーバーの準備が最初の画面表示をブロックしなくなり、引数なし起動時の不要な処理を省略、ワークフロー検出や設定・信頼済みディレクトリ確認の処理も軽量化した
+- インストール・自動更新時のダウンロードサイズを、圧縮方式の変更により大幅に削減(Linux x64で約340MBから約75MBへ)
+- ANTHROPIC_AUTH_TOKENで直接Anthropic APIに認証する形で使っている場合、利用状況の記録が組織に正しく紐づくよう改善。組織のデータ取り扱い設定が反映されるようになった
+- ネイティブアプリ内のスキルやプロンプト文の格納方法を効率化し、アプリのサイズを約2MB削減
+- ネイティブアプリで、必要なコードを必要な時にだけ読み込む方式に変更。1セッションあたりのメモリ使用量が約40〜70MB削減された
+- 長時間動かし続けるセッションでのメモリ使用量(ピーク時)を改善。メモリ使用量が増えてきた段階でより早く不要なメモリの解放が行われるようになった
+- SSH経由での/loginを改善。サインイン用URLがすぐ表示され、「c」キーを押した際はURLが実際にどうコピーされたかを表示(常に成功と表示していたのを修正)、フルスクリーン時のテキスト選択方法も案内するようにした
+- 思考機能をオフにした状態でeffort(思考の強さ)xhighやmaxを指定した際のエラーメッセージを改善。どのレベルが指定されたか、何の設定でオフになっているか、/effort highで直せることを明示するようにした
+- /loop で「何もすることがなかった」連続した起動が、ターミナル上でそれぞれ表示されず1行にまとめられるよう改善
+- 通信を制限する仕組み(サンドボックス)化されたBashツールへの指示文から、通信を許可しているホストの一覧を外した。これにより一覧にないホストへの通信も実際に試行され、その場で許可するか確認できるようになった(以前は一覧にないものは最初からブロックされると誤解されやすかった)
+- /model の選択画面と付属のclaude-apiスキルで、Sonnet 5の価格(100万トークンあたり入力2ドル・出力10ドル)を期間限定の割引ではなく通常価格として表示するよう更新
+- macOSでのcomputer use(画面操作の自動操作機能)で、デスクトップやDock、Finderのウィンドウをクリックする際に、他のアプリと同様にFinderへのアクセス許可をダイアログで与える必要があるよう変更
+- Bedrock、Vertex、Foundry利用時やテレメトリを無効にしている場合、/model・/fast・/effortの変更がターン終了を待たずすぐに反映されるよう変更
+- セッション間メッセージング用の受信口が、接続後30秒以内に1行分のデータを送ってこない接続を切断するよう変更。このしくみにメッセージを送るスクリプトは、データの準備ができてから接続する必要がある
+- 他の端末がRemote Controlを保持している会話を再開しようとした際の案内メッセージを改善。「他の端末上のセッションはここから見えず、ここからも操作できない」旨が明確に表示されるようになった
+- [VSCode] 長いセッションでの履歴の間引き方を改善。古いツール操作の表示行から優先的に削除され、自分やClaudeのメッセージ本文は残るようになった
+- [VSCode] Claude Codeアカウントでサインインしている場合、拡張機能自体の利用状況の記録が組織に正しく紐づくよう改善。組織のデータ取り扱い設定が反映されるようになった</div>
+<details><summary>原文リリースノート (60件)</summary><ul><li>Added a Loops breakdown to `/usage`: per-loop run count, total tokens, tokens per run, and last run, so runaway or chatty `/loop` tasks are easy to spot</li>
+<li>Added `modelPicker` setting: curate the `/model` picker with an ordered, labeled list of models (any id spelling, including Vertex/Bedrock ids), appended to or replacing the built-in lineup</li>
+<li>Added `promptCacheTtl` and `subagentPromptCacheTtl` settings so API-key and cloud-provider users can keep a 1-hour prompt cache on the main conversation while subagents stay at 5 minutes</li>
+<li>Added `modelPricing` managed setting so an organization&#x27;s contracted per-model rates and discount multiplier are used for `/cost`, the status line, and telemetry cost figures instead of list price</li>
+<li>Added a keyless sign-in under `/login` → Anthropic Console: &quot;Sign in with your Console account&quot; (recommended) alongside creating an API key, so organizations that don&#x27;t allow API keys can sign in</li>
+<li>Added a `Skipped sources` line to `/status` that lists managed settings sources (for example `managed-settings.json`) present but not applied because a higher-precedence managed source is active</li>
+<li>Added a `managed` marker in `/mcp` and `/plugins` on claude.ai connectors whose authentication is managed by your organization</li>
+<li>Added a tip pointing claude.ai users who haven&#x27;t connected GitHub for Claude Code on the web to `/web-setup`</li>
+<li>Added a `/status` line showing whether GitHub is connected for Claude Code on the web (Pro/Max), pointing to `/web-setup` when it isn&#x27;t</li>
+<li>Added the model (and effort level) each subagent ran on to `/tasks` and the agent detail dialogs</li>
+<li>Fixed remote MCP servers in non-interactive (`-p`) and SDK sessions never recovering after a dropped connection; they now reconnect automatically or report as failed</li>
+<li>Fixed MCP server sign-in started from the desktop app failing with &quot;Invalid redirect URI&quot; on servers that support client ID metadata documents (for example Linear)</li>
+<li>Fixed auto mode staying unavailable at startup when a temporary server-side disable was cached and later flag fetches failed</li>
+<li>Fixed auto mode tool calls being denied as &quot;temporarily unavailable&quot; after about a minute of waiting when the API was briefly overloaded and asked the client to retry</li>
+<li>Fixed the `/model` picker silently ignoring an Ultracode selection; picking Ultracode now applies it to the current session</li>
+<li>Fixed `/resume` only listing the 50 most recent sessions; the picker now loads more as you scroll</li>
+<li>Fixed cloud sessions resuming after a mid-turn restart with a pending hook or background-task notification re-sent as the prompt instead of the normal continuation message</li>
+<li>Fixed cross-session messaging silently turning off inside user namespaces and rootless containers after the 2.1.232 socket-directory hardening</li>
+<li>Fixed text that hangs outside its container (for example the sign-in URL in `/login`) losing its leading columns when another part of the screen repaints</li>
+<li>Fixed `spellcheck` not underlining a misspelled word typed directly after an emoji</li>
+<li>Fixed background subagents not waking when their last background Bash task completes</li>
+<li>Fixed sessions going silent for 10+ minutes when the Anthropic API never starts a response: the request now times out after ~3 minutes, retries once, then shows `API Error: No response from API`</li>
+<li>Fixed auth, model-availability, and other client-generated error messages rendering like model output instead of as error lines</li>
+<li>Fixed workload identity federation in CI: processes in one job share the exchanged token instead of re-exchanging the single-use token; a rejected exchange fails fast with the server&#x27;s message</li>
+<li>Fixed server-managed `companyAnnouncements` not showing at startup in a session that began with signing in (for example the first launch after `/logout`)</li>
+<li>Fixed hook `if` conditions like `Bash(cat *)` firing on unrelated Bash commands when the command contained `$()` or backtick command substitution followed by more arguments</li>
+<li>Fixed plugin dependencies declared with a `marketplace` field never resolving when both plugins are loaded together via `--plugin-dir`</li>
+<li>Fixed `/reload-plugins` keeping the LSP tool after the last LSP plugin is disabled; it now also warns before an LSP plugin change that would re-read the conversation</li>
+<li>Fixed `--agents` silently ignoring invalid JSON or invalid agent definitions; it now exits with a clear error, like `--mcp-config`</li>
+<li>Fixed `/status` showing &quot;Found invalid entries in: .&quot; with no filename when `~/.claude.json` has an invalid MCP server entry</li>
+<li>Fixed `/clear` removing the `/rename` session name from the prompt bar even though the name was kept for the new session</li>
+<li>Fixed Ctrl+R history search and up-arrow history breaking when `~/.claude/history.jsonl` contains a malformed entry</li>
+<li>Fixed Ctrl+[ not leaving vim INSERT mode in terminals that encode modified keys (modifyOtherKeys / kitty protocol)</li>
+<li>Fixed the local IDE connection being routed through `HTTPS_PROXY` (and sometimes failing) when `localhost` was listed in `NO_PROXY` but not lowercase `no_proxy`; both casings are now honored</li>
+<li>Fixed sandbox network-violation details being dropped from the Bash tool result when the blocked command still exited 0 (for example `curl` printing the proxy&#x27;s 403 page)</li>
+<li>Fixed the status line `rate_limits` fields and `/usage` still showing a rate-limit window&#x27;s pre-reset usage percentage after the window reset while the session was idle</li>
+<li>Fixed `claude --teleport &lt;session&gt;` exiting on uncommitted changes instead of offering to stash them and continue, as the session picker already does</li>
+<li>Fixed `/web-setup` repeatedly asking you to log in when an older GitHub CLI (without `gh auth token`) was already authenticated</li>
+<li>Fixed Claude in Chrome losing its connection to Claude Code after an auto-update cleaned up the version it was set up with; the native host now launches via the stable `claude` launcher</li>
+<li>[VSCode] Fixed sessions started before feature flags were first fetched (for example right after install) opening in the default permission mode instead of auto mode or your configured default mode</li>
+<li>[VSCode] Fixed Focus view sections you expanded collapsing on their own during subagent tool activity</li>
+<li>Improved startup time: sandbox and MCP bring-up no longer block the first frame, bare launches skip subcommand registration, and workflow discovery, settings, and trust-store work is cheaper</li>
+<li>Improved native install and auto-update download size: the binary is now zstd-compressed (about 75 MB instead of 340 MB on Linux x64)</li>
+<li>Improved attribution of usage telemetry to your organization for sessions that authenticate with `ANTHROPIC_AUTH_TOKEN` directly against the Anthropic API, so its data-handling settings apply</li>
+<li>Improved native binary size: about 2 MB smaller by storing the bundled skill and prompt text more compactly</li>
+<li>Improved memory usage of native builds: code is now loaded on demand instead of keeping the whole bundle resident (roughly 40–70 MB less memory per session)</li>
+<li>Improved peak memory usage in long-running sessions (the runtime now garbage-collects sooner as the heap grows)</li>
+<li>Improved `/login` over SSH: the sign-in URL appears immediately, pressing `c` reports how the URL was copied instead of always claiming success, and a hint explains how to select text in fullscreen</li>
+<li>Improved the error when effort `xhigh`/`max` is used with thinking turned off: it now names the level, the setting that disabled thinking, and `/effort high` as the fix</li>
+<li>Improved `/loop`: consecutive wake-ups where Claude has nothing to do now fold into a single line in the terminal instead of printing each one</li>
+<li>Changed the sandboxed Bash tool prompt to no longer list allowed network hosts, so Claude attempts requests (and you can approve new hosts) instead of assuming unlisted hosts are blocked</li>
+<li>Updated the `/model` picker and the bundled `claude-api` skill to show Sonnet 5&#x27;s $2/$10 per Mtok pricing as its standard list price rather than a limited-time promo</li>
+<li>Changed computer use on macOS so clicking the desktop, Dock, or a Finder window requires granting Finder via the access dialog, like any other app</li>
+<li>Changed `/model`, `/fast`, and `/effort` to also run immediately instead of queueing until the turn ends on Bedrock, Vertex, and Foundry and when telemetry is disabled</li>
+<li>Fixed `claude remote-control` exiting and stranding attached Remote Control sessions when the server drops its environment mid-session; it now recovers</li>
+<li>Fixed Remote Control sessions served by `claude remote-control` sometimes getting stuck after it was stopped and restarted, for Team and Enterprise members without an admin or owner role</li>
+<li>Changed the cross-session messaging inbox socket to close connections that send no complete line within 30 seconds; scripts posting to it should connect once their data is ready</li>
+<li>Improved the notice when resuming a conversation whose Remote Control is held by another terminal: it now says sessions on other machines can&#x27;t be seen from, or reach, this one</li>
+<li>[VSCode] Improved history trimming in long sessions: older tool-activity rows are dropped first so your messages and Claude&#x27;s replies stay visible</li>
+<li>[VSCode] Improved attribution of the extension&#x27;s own usage telemetry to your organization when you are signed in with a Claude account, so its data-handling settings apply</li></ul></details>
+</article>
+<article>
+<h2>v2.1.241 <span class="date">2026-08-23</span></h2>
 <div class="summary">This confirms the pattern — for v2.1.240, which also only had &quot;Bug fixes and reliability improvements&quot; as its note, the established format was used. I&#x27;ll follow that same precedent for v2.1.241.
 
 【概要】
