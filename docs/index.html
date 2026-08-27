@@ -45,10 +45,94 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-26 03:42 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-08-27 02:16 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.246 <span class="badge">NEW</span> <span class="date">2026-08-26</span></h2>
+<h2>v2.1.247 <span class="badge">NEW</span> <span class="date">2026-08-27</span></h2>
+<div class="summary">【概要】
+フィードバック送信機能とAPIコスト分析コマンドを追加し、フリーズや設定ファイル消失などの不具合を修正した更新です。
+
+【重要】
+- フックやバックグラウンドのエージェントが大量のエラー出力を出すと、セッションがフリーズして「プロンプトが長すぎます」と表示され使えなくなる不具合を修正(影響: フックやバックグラウンド実行を使っている人)
+- dotfile管理ツール(nix/home-manager、stowなど)で `~/.claude/settings.json` をリンクとして管理していると、コマンド実行後の後片付けで設定ファイルが消えてしまう不具合を修正(影響: dotfile管理ツールで設定ファイルを管理している人)
+- クラウド版セッション(Web版、デスクトップ/モバイルアプリ)で実行環境が途中で再起動すると、それ以降応答がなくなり作業内容も失われる不具合を修正(影響: クラウド版でバックグラウンドのエージェントやシェル実行を使っている人)
+
+【詳細】
+
+■ 新機能
+- 何か問題が起きたセッションで、Claudeがフィードバック内容を下書きし、`/feedback` から内容を確認して送信できる機能を追加(`feedbackDrafts` 設定でオフにできる)
+- 起動時に表示される豆知識(ヒント)を、組織側で独自に用意したものと標準のものを織り交ぜて表示できるようになった(`{id, text, cooldownSessions, priority}` の指定、専用ファイル、ラベル表示に対応)
+- Bashコマンドの実行許可を尋ねる画面に、自動実行モードを案内するヒントを追加。キー一つで「はい、自動実行モードに切り替える」を選べるようになった
+- 使用中のプロジェクトでのClaude APIの利用料金を分析し、キャッシュ活用やトークン削減、バッチ処理、モデル選択など、費用を抑える対策を1つずつ確認しながら進められる `/claude-api cost-optimize` コマンドを追加
+- `/claude-api` の情報を更新し、組織管理者向けAPI(メンバー管理、招待、ワークスペース、APIキー、利用上限のレポート、外部ID連携、独自の暗号鍵管理など)の内容を追加
+
+■ 修正
+- 履歴検索や `/config`、`/mcp`、`/skills`、バックグラウンドタスク一覧、`/model` の画面で、矢印キーとEnterキーを素早く押すと、選んだ項目ではなく1つ上の項目が実行されてしまう不具合を修正
+- サブエージェントが最初の呼び出しでモデルのエラー(404)に遭遇すると停止してしまう不具合を修正。以後は通常のセッションと同じ代替モデルへの切り替えが行われ、呼び出し元に返るエラーにも種類・状態・リクエストID・モデル名が含まれるようになった
+- フックやバックグラウンドのエージェントが大量のエラー出力を出すと、セッションがフリーズして「プロンプトが長すぎます」と表示され使えなくなる不具合を修正
+- キーボード配列がキリル文字などラテン文字以外の場合、対応端末でCtrlキーのショートカットが効かない不具合を修正
+- マウス操作の情報が2回に分かれて届いた際に、意味のない文字列が入力欄に紛れ込む不具合を修正
+- dotfile管理ツール(nix/home-manager、stowなど)で `~/.claude/settings.json` をリンクとして管理し、書き込み許可範囲外を指すように変更していると、コマンド実行後の後片付け処理でそのリンクが削除されてしまう不具合を修正
+- `/terminal-setup` を実行すると、Zedエディタのキー割り当てファイル全体が上書きされてしまっていた不具合を修正。以降は必要なキー割り当てのみを追記する
+- `/rename` がセッション名の変更に失敗しても成功したように表示していた不具合を修正。失敗時は他のセッションで古い名前のまま表示される可能性がある旨を案内するようになった
+- `--agent` オプション付きで開始したセッションで `/compact` や「Summarize from here」を使うと、そのセッション独自の指示ではなく標準の指示に基づいて要約されてしまう不具合を修正
+- バックグラウンドセッションの表示元プロセスが終了すると、`claude agents` 上でそのセッションが「起動中…」のまま止まって見える不具合を修正。今は数秒で失敗理由が表示され、Enterキーで再起動できる
+- フックやバックグラウンドタスクの出力を保存するファイルへの書き込みに失敗すると、メモリ使用量が際限なく増え続ける不具合を修正。書き込みに失敗した場合はその旨がファイルに記録されるようになった
+- SSH接続時に `/install-github-app` を実行すると、実際にはコピーできていないのに「コピーしました」と表示されていた不具合を修正。ブラウザを開けない環境ではサインイン用URLがすぐに表示されるようになった
+- 手前(フォアグラウンド)で実行していたシェルコマンドがバックグラウンド実行に切り替わった際、完了時に内部エラーが記録されたり紛らわしいエラー表示が出たりする不具合を修正
+- バージョン番号のないプラグイン提供元を2回目以降にインストールすると、稼働中のプラグインが使っているキャッシュ用フォルダが削除・再作成され、動作中のセッションに支障が出る不具合を修正
+- `/remote-control` で開始したリモート操作用セッションで、作業中のファイル変更内容が接続先の端末に伝わらない不具合を修正
+- 自己ホスト型ランナーのセッションで、Claude Codeがまだ起動していない段階で「実行中」と報告され、Claudeデスクトップアプリから「入力待ちです」という誤った通知が届くことがある不具合を修正
+- 組織の管理設定でClaude公式アプリ経由のサインインを使う設定になっている環境で、Anthropicのサーバーに接続できないと、初回セットアップが「Anthropicのサービスに接続できません」と表示されて失敗する不具合を修正
+- クラウド版セッション(Web版、デスクトップ/モバイルアプリ)で、メッセージ送信直後に実行許可モードを切り替えると、切り替え前のモードが表示されたままになることがある不具合を修正
+- クラウド版セッション(Web版、デスクトップ/モバイルアプリ)で実行環境が途中で再起動すると、それ以降応答がなくなり作業内容も失われる不具合を修正。再開時にはその間失われた作業内容が報告されるようになった
+
+■ 変更
+- プラグインの提供元の安全性を強化し、名前に制御文字や見えない文字を含むものを拒否するようにした。また `/plugin` や `claude plugin` の表示欄でも、外部から渡された文字列が画面表示を壊さないよう安全に処理されるようになった
+- Bedrock、Vertex、Foundry経由の利用時(および利用状況の送信を無効にしている場合)、設定したMCPサーバーへの接続に失敗すると、Claudeに接続失敗の事実が伝わるようになった。以前はツールが存在しないと誤って判断していた
+- Sonnet 5モデルの自動要約が始まるタイミングを、100万トークンの拡張枠をフル活用するよう変更。同じ拡張枠でも要約開始が約93.4万トークンから約96.7万トークンに変わった
+- 別セッションからのメッセージ通知を、既定で「送信者名と本文の1行目」だけの1行表示にまとめるよう変更。Ctrl+Oで全文を表示できる
+- 整形されたMarkdown内のリンクについて、リンク先がネットワーク上の場所や自動接続されるパスを指す場合や、制御文字・見えない文字を含む場合は、クリックできるリンクではなくただの文字として表示するよう変更
+- 画面下部のプルリクエスト状態表示について、最後の確認から1分未満であれば、端末に戻ってきた際のGitHubへの再確認を省略するよう変更
+- 組織の管理設定でサインイン方法が固定されている場合や独自のサインイン方式を使っている場合、起動時から利用状況の送信を行わないよう変更(以前はサインイン後に無効化されていた)
+- Claude公式アプリ経由のサインイン要求に、Claude Codeからの要求であることを示す識別情報を付与するよう変更
+- 組織でのサインイン必須設定について、管理者側の設定ファイルが読み込めない場合、たとえ他の手段(端末側の設定やWindowsのレジストリ)で設定があっても起動時点で終了するよう変更</div>
+<details><summary>原文リリースノート (33件)</summary><ul><li>Added the `SendFeedback` tool: when something goes wrong in a session, Claude can draft a feedback report for you to review and send from `/feedback` (turn off with the `feedbackDrafts` setting)</li>
+<li>Added `{id, text, cooldownSessions, priority}` entries, `tipsFile`, and `label` to `spinnerTipsOverride`, so organizations can rotate their own tips alongside the built-in ones</li>
+<li>Added a tip on Bash permission prompts pointing to auto mode, with a one-keystroke &quot;Yes, and switch to auto mode&quot; option</li>
+<li>Added `/claude-api cost-optimize` to profile an existing project&#x27;s Claude API spend and work through cost levers (caching, token hygiene, batch, effort, model choice) one measured change at a time</li>
+<li>Updated the `/claude-api` skill with Admin API coverage (organization members, invites, workspaces, API keys, rate limit reports, workload identity federation, CMEK)</li>
+<li>Fixed fast arrow-key + Enter sequences acting on the row above the one you navigated to in history search, `/config`, `/mcp`, `/skills`, background tasks, and `/model`</li>
+<li>Fixed sub-agents dying on a first-call model 404: they now use the session&#x27;s fallback model chain, and the error returned to the parent includes the error type, status, request id, and model</li>
+<li>Fixed a hook or background agent that printed megabytes of error output being able to overflow the conversation and wedge the session on &quot;Prompt is too long&quot;</li>
+<li>Fixed Ctrl keyboard shortcuts not firing under non-Latin (e.g. Cyrillic) keyboard layouts in kitty-protocol terminals</li>
+<li>Fixed text like `&lt;35;150;7M` being inserted into the prompt when a mouse report arrived split across reads right after the escape prefix</li>
+<li>Fixed the Bash sandbox&#x27;s after-command cleanup deleting a dotfile-managed `~/.claude/settings.json` symlink (nix/home-manager, stow) when it is repointed outside the sandbox&#x27;s writable area</li>
+<li>Fixed `/terminal-setup` overwriting your entire Zed `keymap.json` instead of merging in its keybinding</li>
+<li>Fixed `/rename` silently confirming when the session registry could not be updated; it now says other sessions may still show the old name</li>
+<li>Fixed `/compact` and &quot;Summarize from here&quot; in sessions started with `--agent` summarizing under the default system prompt instead of the conversation&#x27;s own</li>
+<li>Fixed a background session showing &quot;opening…&quot; forever in `claude agents` after its terminal host process died; the row now fails within seconds with the reason, and Enter restarts it</li>
+<li>Fixed unbounded memory growth when a hook&#x27;s or background task&#x27;s output file could not be written; the file now notes where output was lost</li>
+<li>Fixed `/install-github-app` over SSH: the copy shortcut now says how the sign-in URL was copied instead of always claiming success, and the URL appears immediately when no browser can open</li>
+<li>Fixed shell commands carried over from the foreground logging an internal error or showing a misleading `[exited with code -1]` line when they finish in background sessions</li>
+<li>Fixed a version-less marketplace plugin&#x27;s live cache directory being deleted and recreated on a second-scope install, which could disrupt a running session using it</li>
+<li>Fixed Remote Control sessions started with `/remote-control` not reporting the working-tree diff to connected clients</li>
+<li>Fixed self-hosted runner sessions reporting `running` before Claude Code had started, which could trigger a premature &quot;Claude is waiting for your input&quot; notification from the Claude desktop app</li>
+<li>Fixed first-run setup exiting with &quot;Unable to connect to Anthropic services&quot; when managed settings configure Claude apps gateway sign-in and Anthropic endpoints are unreachable</li>
+<li>Fixed cloud sessions (Claude Code on the web, desktop and mobile apps) sometimes showing the previous permission mode when you switch modes right after sending a message</li>
+<li>Fixed cloud sessions going silent when the session&#x27;s container restarts between turns while a background agent, shell, or monitor is still running — the resumed session now reports the lost work</li>
+<li>Improved plugin marketplace hardening: names containing control or invisible characters are rejected, and marketplace-supplied text in `/plugin` and `claude plugin` output is escape-safe</li>
+<li>Improved Bedrock, Vertex, and Foundry sessions (and any with telemetry disabled): Claude is now told when a configured MCP server failed to connect, instead of concluding its tools don&#x27;t exist</li>
+<li>Changed Sonnet 5&#x27;s default auto-compact window to its full 1M context, so sessions on the 1M window now auto-compact at about 967K tokens instead of about 934K</li>
+<li>Changed cross-session peer messages to collapse by default to a one-line `Message from @&lt;sender&gt;: &lt;first line&gt;` preview; Ctrl+O expands the full body</li>
+<li>Changed terminal hyperlinks in rendered markdown: link targets that point at a network or automounter path, contain a control character, or lead with an invisible character now render as plain text</li>
+<li>Changed the prompt-footer PR badge to skip its GitHub re-check on terminal refocus when the last check is under a minute old</li>
+<li>Changed analytics to stay off from startup, not only after login, when managed settings force gateway login or a custom OAuth deployment is configured</li>
+<li>Changed Claude apps gateway sign-in requests to identify Claude Code (a `surface=claude_code` device-authorization parameter and a `claude-code/&lt;version&gt;` User-Agent)</li>
+<li>Changed organization sign-in enforcement to exit at start when the administrator&#x27;s managed settings cannot be read, even if host-supplied or per-user Windows registry settings exist</li></ul></details>
+</article>
+<article>
+<h2>v2.1.246 <span class="date">2026-08-26</span></h2>
 <div class="summary">【概要】
 表示落ちや再開時の不具合を多数修正し、ディレクトリ移動や権限設定の使い勝手も改善しました。
 
