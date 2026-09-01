@@ -45,10 +45,32 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-08-29 03:27 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-09-01 00:49 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.251 <span class="badge">NEW</span> <span class="date">2026-08-29</span></h2>
+<h2>v2.1.252 <span class="badge">NEW</span> <span class="date">2026-09-01</span></h2>
+<div class="summary">【概要】
+一部Macでのbash失敗、リモート操作の一時停止、権限保存漏れなど複数の不具合を修正。
+
+【重要】
+- Macで特定条件下ではbashコマンドがエラーで動かなくなっていた点を修正(影響: Macでコマンド実行を多用する人)
+- Claude DesktopやVS Codeからリモート操作中、通信が不安定だとツール完了後に数分間反応が止まっていた点を修正(影響: リモート操作機能を使っている人)
+- バックグラウンド処理でエラー出力が非常に大きくなる場合(ディスク満杯時のgitエラーなど)に会話が壊れてしまう点を修正(影響: バックグラウンドでコマンドを実行する人)
+
+【詳細】
+
+■ 修正
+- 一部のMacで、bashコマンドが「task output swap refused(tasks dir moved or linked)」というエラーで失敗していた問題を修正
+- 設定ファイル(.claude/settings.local.json)がまだ存在しないプロジェクトで、「常に許可」を選んでもその選択が保存されなかった問題を修正
+- Claude DesktopやVS Codeでリモート操作をしている際、claude.aiとの接続が不安定だと、ツールの実行が終わっても数分間反応が返ってこなかった問題を修正
+- バックグラウンドで実行したタスクの失敗内容(ディスク容量不足時のgitエラーなど)が非常に大きい場合に、通知によって会話がAPIの送信上限を超えてしまっていた問題を修正</div>
+<details><summary>原文リリースノート (4件)</summary><ul><li>Fixed Bash commands failing with &quot;task output swap refused (tasks dir moved or linked)&quot; on some Macs</li>
+<li>Fixed &quot;always allow&quot; not saving in a project that has no .claude/settings.local.json yet</li>
+<li>Fixed Remote Control sessions hosted by Claude Desktop or VS Code stalling for minutes after a tool finished when the connection to claude.ai was degraded</li>
+<li>Fixed background task notifications with very large failure output (for example git errors on a full disk) making the conversation exceed the API request size limit</li></ul></details>
+</article>
+<article>
+<h2>v2.1.251 <span class="date">2026-08-29</span></h2>
 <div class="summary">【概要】
 セキュリティ修正、会話停止・バックグラウンドセッションの不具合修正、権限承認の強化を行うバージョン
 
