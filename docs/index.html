@@ -45,10 +45,102 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-09-01 23:39 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-09-02 23:38 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.258 <span class="badge">NEW</span> <span class="date">2026-09-01</span></h2>
+<h2>v2.1.259 <span class="badge">NEW</span> <span class="date">2026-09-02</span></h2>
+<div class="summary">【概要】
+複数セッション使用時の設定消失や再開失敗など多くの不具合を修正し、MCP管理機能などを追加。
+
+【重要】
+- 複数のターミナルやウィンドウで同時にClaude Codeを起動していると、互いの設定(信頼済みフォルダの情報やMCP・プロジェクトの設定)を消し合ってしまう不具合を修正(影響: 同時に複数セッションを使う人)
+- 保存済みの会話に中身のない添付ファイルの記録が含まれていると `--resume` が失敗し、`--continue` では空の会話が開いてしまう不具合を修正(影響: 過去の会話を再開して使う人)
+- カスタムコマンドやスキルの設定に書いたモデル指定が、対話セッションで無視される不具合を修正(影響: コマンドやスキルでモデルを指定している人)
+
+【詳細】
+
+■ 新機能
+- 組織の管理者が、HTTPまたはSSEで動くMCPサーバー(=外部ツール連携)を全ユーザーに一括で使わせられる管理設定「managedMcpServers」を追加(起動コマンドを指定するタイプの登録は対象外)
+- 監視者がいない自動実行環境向けに、確認が必要な操作をすべて自動的に拒否する `--permission-prompts none` を追加(自動応答モードなど現在の許可設定はそのまま有効)
+- GitLabのマージリクエスト操作(作成・マージ・クローズ・再オープン・コメント・更新)を認識し、ツール実行結果の要約に「MR !番号」と表示、画面下部のバッジも更新するように
+- `claude plugin validate` にプログラムで読み取れるJSON形式の結果を出力する `--json` オプションを追加
+- [VSCode] セッション一覧に「アクティブのみ表示」の絞り込みと、状態(入力待ち・作業中・完了)で絞り込むメニューを追加
+
+■ 修正
+- 複数セッション同時実行で、設定ファイル(~/.claude.json)の変更を互いに上書きし合い、信頼済みフォルダの設定が勝手にリセットされたりMCP・プロジェクトの設定が消えたりする不具合を修正
+- 一度「思考内容」が却下された会話で、それ以降の全ターンで毎回却下され続けてしまう不具合を修正
+- Bashコマンドの読み取り拒否ルールが、オプションの値として渡されたファイル(例: --ignore-revs-file=.env、-f.env、@file)、git diff/git grepの対象ファイル、「cd フォルダ &amp;&amp; cat ファイル」のような連結コマンドに適用されていなかった不具合を修正。あわせて、拒否対象のファイルを含むフォルダへの grep -r や cp -r は確認を求めるように変更
+- 利用状況の送信を無効にしたセッションで、認証トークンが更新されると会話のキャッシュ(=直前までのやり取りの再利用)が無効になっていた不具合を修正
+- 数百回のツール呼び出しを含む長いやり取りのあと、全画面モードで会話が真っ白になる不具合を修正
+- コマンドやスキルでモデルを指定していても、自動応答モードがそのモデルに対応していない場合に別モデルでターンを実行してしまう不具合を修正(現在はセッションのモデルのまま実行)
+- Claude Codeが認識しないバージョンのVertex形式モデルID(末尾が @YYYYMMDDのもの)に対して `CLAUDE_CODE_MAX_CONTEXT_TOKENS` が反映されない不具合を修正
+- 実行中のシェルコマンドの出力プレビューで、途中の行が折り返されていると最新の行が隠れてしまう不具合を修正
+- claude.aiユーザーに対して起動のたびに実行されていたGitHub接続確認を、結果を記憶して次回以降は省略するように変更
+- 保存済み会話に中身のない添付ファイルの記録が含まれると `--resume` が失敗し、`--continue` では空の会話が開いてしまう不具合を修正
+- 対話セッションで、カスタムコマンドやスキルの設定に書いたモデル指定が無視される不具合を修正
+- 古いバージョンから続けている会話でArtifact(=作成物)を公開しようとすると、「想定外のパラメータ note」というエラーが一度だけ出る不具合を修正
+- MDMやポリシー管理ツールが先に一度実行済みだと、起動時に管理設定の強制再取得が無視されていた不具合を修正
+- 自動処理によって作られた作業用フォルダに対して、gitの状態確認コマンドが特殊なエラーメッセージを返す環境で、隔離された作業フォルダが拒否されていた不具合を修正
+- クラウド上で実行したセッションの計測データに、ユーザーのメールアドレスや組織ID、アカウントIDが含まれていなかった不具合を修正
+- 起動時にツール一覧を取得中に接続が切れたMCPサーバーが、エラーとして報告されず「ツールなしで接続済み」と表示されていた不具合を修正
+- ファイル編集の許可確認画面で、変更後の行が長いと表示が途中で切れて省略の印もない不具合を修正
+- 一時的にgitの確認処理が失敗すると、認識済みのリポジトリ情報が失われてしまう不具合を修正
+- 管理設定ファイル(管理設定本体、追加設定ファイル、MDMの設定、Windowsのレジストリ値のいずれか)が読み込めない場合に、その設定が気づかれないまま無効になっていた不具合を修正。現在は起動を中止し、原因のファイルを表示するように変更
+- リモート操作セッションで「停止」を押しても裏側で動くエージェントやワークフローが実際には止まっていなかった不具合を修正。停止したタスクは処理が終わるまで一覧に残り、再度停止操作ができるように
+- ワークフローの実行結果を再開する際、直前の停止処理がまだ終わっていないと、エージェントが重複して動いてしまう不具合を修正
+- github.com上のマーケットプレイスのリポジトリURLの末尾にスラッシュや余分な記号(?や#)が付いていると、正しく複製できないURLが生成されていた不具合を修正
+- ターンの実行を止めるフックが働いたとき、次のターンでその回のモデルの思考内容が失われ、モデルによっては会話のキャッシュも効かなくなっていた不具合を修正
+- ブラウザ上で動くMCPサーバーのページが閉じられていた場合に、リモート(claude.ai)セッションがターン開始まで60秒待たされていた不具合を修正
+- 隔離された作業フォルダを使うセッションで、一般的なBashのループ処理やxargsを使った連続処理、ラッパー経由のコマンドが、本来のフォルダにアクセスできず拒否されていた不具合を修正
+- リモートおよびスケジュール実行のセッションで、一時停止中に外部連携ツールの許可確認を承認しても、そのまま何も起きなくなる不具合を修正
+
+■ 変更
+- 長い応答の表示で、文字サイズの計算結果を使い回すことで、画面のリサイズや初回描画の速度を改善
+- `/workflows` のエージェント詳細画面で、JSON形式の結果を色分けと改行付きで見やすく表示し、長い結果は折りたたんで展開できるように改善
+- ヘッドレス/SDK経由のセッションで、MCPサーバーの接続完了後、最初のターン開始が最大50ミリ秒早くなるよう改善
+- `/install-github-app` を、GitLabのリポジトリ内で実行した場合にGitHub専用機能であることを説明し、GitLab CI/CDのドキュメントを案内するように改善
+- バックグラウンドで動く子エージェントの結果を親エージェント側の記録にも保存するように改善。再開時にも結果が残り、共有された記録上でも確認できるように
+- `allowedMcpServers` の適用範囲を、ユーザーが自分で追加したMCPサーバーのみに変更。これまで許可リストで除外されていた管理設定側のMCPサーバーは、アップグレード後は読み込まれるようになる(除外したい場合は `deniedMcpServers` を使用)</div>
+<details><summary>原文リリースノート (37件)</summary><ul><li>Added `managedMcpServers` managed setting: organizations can provide HTTP/SSE MCP servers to every user (same entry shape as `.mcp.json`); entries that name a command to run are skipped</li>
+<li>Added `--permission-prompts none` for unattended headless hosts: anything that would prompt is denied automatically while the active permission mode (including auto mode) keeps deciding</li>
+<li>Added recognition of `glab mr create/merge/close/reopen/note/update` so GitLab merge requests show as `MR !N` in the collapsed tool summary and refresh the footer MR badge</li>
+<li>Added `--json` to `claude plugin validate` for a machine-readable validation report</li>
+<li>Fixed concurrent sessions silently reverting each other&#x27;s `~/.claude.json` changes — workspace trust no longer resets and MCP/project state is no longer lost when running many sessions at once</li>
+<li>Fixed a conversation whose thinking was rejected once being rejected again on every later turn</li>
+<li>Fixed Bash `Read()` deny rules not covering files given as option values (`--ignore-revs-file=.env`, `-f.env`, `@file`), `git diff`/`git grep` file operands, or `cd DIR &amp;&amp; cat FILE` compounds; `grep -r`/`cp -r` over a directory holding a denied file now asks</li>
+<li>Fixed the prompt cache being invalidated when the OAuth token refreshed in sessions with telemetry disabled</li>
+<li>Fixed fullscreen mode showing a blank conversation after a long turn with hundreds of tool calls</li>
+<li>Fixed auto mode running a turn on a model it doesn&#x27;t support when a command or skill&#x27;s frontmatter `model:` named one; the turn now keeps the session model</li>
+<li>Fixed `CLAUDE_CODE_MAX_CONTEXT_TOKENS` being ignored for Vertex-style model IDs (`@YYYYMMDD` suffix) of model versions Claude Code doesn&#x27;t recognize</li>
+<li>Fixed the live output preview of a running shell command hiding its newest lines when an earlier line wrapped</li>
+<li>Fixed a background GitHub connection check that ran on every launch for claude.ai users; the result is now remembered across launches</li>
+<li>Fixed `--resume` failing (and `--continue` opening an empty conversation) when a saved session contains an attachment entry with no payload</li>
+<li>Fixed frontmatter `model:` on custom commands and skills being ignored in interactive sessions</li>
+<li>Fixed Artifact publishing failing once with an &quot;unexpected parameter `note`&quot; error in conversations continued from an older version</li>
+<li>Fixed managed `forceRemoteSettingsRefresh` being ignored at startup when a policy helper configured by MDM or the managed settings file had already run</li>
+<li>Fixed worktree isolation refusing hook-created worktrees on machines where `git rev-parse` fails with a message other than &quot;not a git repository&quot;</li>
+<li>Fixed OpenTelemetry metrics and events from cloud sessions missing the `user.email`, `organization.id`, and `user.account_uuid` attributes</li>
+<li>Fixed MCP servers that disconnect while their tools are being listed at startup showing as connected with no tools instead of reporting the error</li>
+<li>Fixed the file edit permission dialog sometimes showing a changed line cut short with no indication</li>
+<li>Fixed repository detection dropping a known repo identity after a transient git probe failure</li>
+<li>Fixed managed settings silently going unenforced when the managed-settings file, a drop-in, the MDM plist, or the HKLM value cannot be parsed: Claude Code now refuses to start and names the source</li>
+<li>Fixed Stop not actually stopping background agents and workflows in remote-control sessions: killed tasks now stay visible and re-stoppable until their processes exit</li>
+<li>Fixed resuming a workflow run while its previous stopped run was still exiting, which could run duplicate copies of its agents</li>
+<li>Fixed marketplace repo URLs on github.com with a trailing slash or dangling `?`/`#` producing an unusable `.git` clone URL</li>
+<li>Fixed blocking Stop hooks causing the turn after a block to lose the model&#x27;s reasoning from that turn and, on some models, miss the prompt cache</li>
+<li>Fixed remote (claude.ai) sessions taking 60 seconds to start a turn after a browser-hosted MCP server&#x27;s page had gone away</li>
+<li>Fixed worktree-isolated sessions refusing common Bash loops, xargs pipelines and launcher-wrapped commands that cannot reach the main checkout</li>
+<li>Improved terminal resize and first-render performance for long responses by reusing text measurements</li>
+<li>Improved `/workflows` agent detail: JSON outcomes are pretty-printed with syntax colors and real line breaks, and long outcomes fold behind an expand toggle</li>
+<li>Improved headless/SDK session start: the first turn begins up to 50 ms sooner when MCP servers finish connecting</li>
+<li>Improved `/install-github-app` to explain it is GitHub-only and point to the GitLab CI/CD docs when run inside a GitLab repository</li>
+<li>Improved nested background subagent results to be saved in the parent subagent&#x27;s transcript, so resumed subagents keep them and shared transcripts show the delivery</li>
+<li>Changed `allowedMcpServers` to govern only servers users add: a literal `managed-mcp.json` server your allowlist used to filter out now loads on upgrade; use `deniedMcpServers` to keep it off</li>
+<li>[VSCode] Added an Active quick filter and a status filter menu (Needs input, Working, Completed) to the session list sidebar</li>
+<li>Fixed remote and scheduled sessions doing nothing after a connector-tool permission prompt was approved while the session was paused</li></ul></details>
+</article>
+<article>
+<h2>v2.1.258 <span class="date">2026-09-01</span></h2>
 <div class="summary">【概要】
 macOS 12での起動不可と、リモート・自動実行セッションが途中で止まる不具合を修正しました。
 
