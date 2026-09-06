@@ -1,6 +1,14 @@
 {
-  "last_version": "2.1.261",
+  "last_version": "2.1.263",
   "releases": [
+    {
+      "version": "2.1.263",
+      "notes": [
+        "Bug fixes and reliability improvements"
+      ],
+      "summary_ja": "【概要】\n細かい不具合の修正と安定性向上が中心の更新です。\n\n【重要】\n- 特になし\n\n【詳細】\n\n■ 修正\n- その他、細かい不具合修正と安定性向上など",
+      "detected_at": "2026-09-06T07:18:51+00:00"
+    },
     {
       "version": "2.1.261",
       "notes": [
