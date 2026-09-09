@@ -1,6 +1,14 @@
 {
-  "last_version": "2.1.265",
+  "last_version": "2.1.266",
   "releases": [
+    {
+      "version": "2.1.266",
+      "notes": [
+        "Fixed a 2.1.265 regression affecting LLM-gateway and proxy setups: the undocumented `CLAUDE_CODE_USE_GATEWAY` environment variable, previously ignored unless `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` were both set, began forcing Cloud-gateway sign-in on its own in 2.1.265, so configurations that set it alongside an API key, `apiKeyHelper`, or custom auth headers failed every request with \"Not signed in to the Cloud gateway\". The variable on its own is ignored again; no configuration change is needed"
+      ],
+      "summary_ja": "【概要】\n自社の中継サーバーやAPIキー認証を使う設定で、全リクエストが認証エラーになっていた不具合を修正しました。\n\n【重要】\n- 自社のAI中継サーバー(プロキシ)経由でClaude Codeを使い、APIキーや独自の認証ヘッダーを設定している場合、前バージョンで全リクエストが「Not signed in to the Cloud gateway」という認証エラーで失敗していた不具合を修正(影響: 自社の中継サーバー経由でAPIキーや独自認証を使って接続している人)\n\n【詳細】\n\n■ 修正\n- 前バージョン(2.1.265)で、通常は使われていない設定項目「CLAUDE_CODE_USE_GATEWAY」が原因で、自社の中継サーバーやAPIキー認証を使う設定において、Claude Codeが勝手にCloud経由のログインを要求するようになり、全リクエストが「Not signed in to the Cloud gateway」という認証エラーで失敗する不具合があった。この設定項目単体では影響しないよう修正し、以前の動作に戻した。利用者側での設定変更は不要。",
+      "detected_at": "2026-09-09T07:34:40+00:00"
+    },
     {
       "version": "2.1.265",
       "notes": [
