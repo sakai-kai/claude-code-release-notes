@@ -45,10 +45,24 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-09-11 23:37 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-09-12 23:27 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.269 <span class="badge">NEW</span> <span class="date">2026-09-11</span></h2>
+<h2>v2.1.270 <span class="badge">NEW</span> <span class="date">2026-09-12</span></h2>
+<div class="summary">【概要】
+長時間使っていると、変更を伴わないgitコマンドにも許可を求められるようになっていた不具合を修正しました。
+
+【重要】
+- セッションを長時間使い続けていると、git status や git log のような内容を変更しないgitコマンドの実行時にも、途中から許可を求められるようになっていた(前のバージョン2.1.269で発生した不具合)(影響: Claude Codeを立ち上げっぱなしで長時間作業する人)
+
+【詳細】
+
+■ 修正
+- セッションを長時間使い続けていると、git status や git log のような内容を変更しないgitコマンドの実行時にも、途中から許可を求められるようになっていた不具合を修正(前のバージョン2.1.269で発生した不具合)</div>
+<details><summary>原文リリースノート (1件)</summary><ul><li>Fixed read-only git commands in Bash unexpectedly asking for permission after a session had been running for a while (regression in 2.1.269)</li></ul></details>
+</article>
+<article>
+<h2>v2.1.269 <span class="date">2026-09-11</span></h2>
 <div class="summary">【概要】
 権限やコミット署名の不具合を修正し、VSCodeやSlack連携などに新機能を追加した更新版
 
@@ -3924,20 +3938,6 @@ Bash権限確認の抜け穴修正、認証情報を隠すマスク機能追加�
 <li>The agents footer hint now shows how many background agents are waiting on your input, with a brief color emphasis when the count changes</li>
 <li>Agent view: the session you pressed ← from stays visibly marked even after mouse hover or arrow keys move the selection</li>
 <li>Fable temporarily shows as unavailable in the advisor picker while a server-side issue causing Fable advisor failures is fixed</li></ul></details>
-</article>
-<article>
-<h2>v2.1.209 <span class="date">2026-07-21</span></h2>
-<div class="summary">【概要】
-バックグラウンドで動かすエージェントセッションで、/model などの設定画面が開けなくなっていた不具合を修正しました。
-
-【重要】
-- バックグラウンドのエージェントセッションで /model などの設定画面が開けなくなっていた不具合を修正(影響: `claude agents` でバックグラウンドセッションを使っている人)
-
-【詳細】
-
-■ 修正
-- バックグラウンドのエージェントセッションで /model などの設定画面が開けなくなっていた不具合を修正(以前入れた広すぎる制限を取り消した)</div>
-<details><summary>原文リリースノート (1件)</summary><ul><li>Fixed /model and other dialogs being blocked in `claude agents` background sessions (reverts an overly broad guard)</li></ul></details>
 </article>
 </main>
 </body>

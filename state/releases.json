@@ -1,6 +1,14 @@
 {
-  "last_version": "2.1.269",
+  "last_version": "2.1.270",
   "releases": [
+    {
+      "version": "2.1.270",
+      "notes": [
+        "Fixed read-only git commands in Bash unexpectedly asking for permission after a session had been running for a while (regression in 2.1.269)"
+      ],
+      "summary_ja": "【概要】\n長時間使っていると、変更を伴わないgitコマンドにも許可を求められるようになっていた不具合を修正しました。\n\n【重要】\n- セッションを長時間使い続けていると、git status や git log のような内容を変更しないgitコマンドの実行時にも、途中から許可を求められるようになっていた(前のバージョン2.1.269で発生した不具合)(影響: Claude Codeを立ち上げっぱなしで長時間作業する人)\n\n【詳細】\n\n■ 修正\n- セッションを長時間使い続けていると、git status や git log のような内容を変更しないgitコマンドの実行時にも、途中から許可を求められるようになっていた不具合を修正(前のバージョン2.1.269で発生した不具合)",
+      "detected_at": "2026-09-12T23:27:16+00:00"
+    },
     {
       "version": "2.1.269",
       "notes": [
