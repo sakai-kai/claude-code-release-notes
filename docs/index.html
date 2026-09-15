@@ -45,10 +45,24 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-09-15 00:05 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-09-15 08:02 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.271 <span class="badge">NEW</span> <span class="date">2026-09-15</span></h2>
+<h2>v2.1.272 <span class="badge">NEW</span> <span class="date">2026-09-15</span></h2>
+<div class="summary">【概要】
+細かな不具合修正と動作の安定性向上を行ったアップデートです。
+
+【重要】
+- 特になし
+
+【詳細】
+
+■ 修正
+- 不具合の修正と、動作の安定性を高める改善を実施</div>
+<details><summary>原文リリースノート (1件)</summary><ul><li>Bug fixes and reliability improvements</li></ul></details>
+</article>
+<article>
+<h2>v2.1.271 <span class="date">2026-09-15</span></h2>
 <div class="summary">【概要】
 権限チェックやセッション復元まわりの不具合修正を中心に、新機能とUI改善を多数追加。
 
@@ -3971,98 +3985,6 @@ Bash権限確認の抜け穴修正、認証情報を隠すマスク機能追加�
 <li>Changed agent view / `claude agents --json`: sessions waiting on a sandbox, MCP-input, or managed-settings prompt now show as &quot;Needs input&quot; instead of &quot;Working&quot;</li>
 <li>Updated the auth status panel title from &quot;Cloud authentication&quot; to &quot;Authentication&quot;</li>
 <li>Corrected an earlier release note (2.1.200): tmux through the 3.6 series lacks synchronized output; newer tmux with support is detected automatically</li></ul></details>
-</article>
-<article>
-<h2>v2.1.211 <span class="date">2026-07-21</span></h2>
-<div class="summary">【概要】
-権限確認の安全性や誤課金など重要な不具合を修正し、多数の細かな不具合・使い勝手も改善した更新
-
-【重要】
-- Bedrock・Vertex AI・Mantle・Foundry経由で利用している場合、本来は再利用されるはずのキャッシュ済み情報(=毎回使い回せるはずの入力内容)の末尾部分が、毎回新規の入力として課金されてしまっていた不具合を修正した(影響: Bedrock/Vertex AI/Mantle/Foundry経由でClaude Codeを使っている人)
-- SlackなどのチャットにClaude Codeの実行確認メッセージを転送している場合、ツールへの入力に紛らわしい特殊文字(表示順序を逆にする文字や幅のない文字、似た形の引用符など)が含まれていると、承認メッセージの見た目が細工されてしまう問題を修正した(影響: チャットツール経由で実行確認・承認を行っている人)
-- フック(=特定の操作の前後に自動実行する設定)でBashコマンド実行時に「確認する」判定を出しても、自動判断モード(auto)がそれを上書きしてサンドボックス外で確認なしに実行してしまうことがあった不具合を修正した。これ以降はフック側が「確認する」と判定した場合、必ず確認が入るようになった(影響: フックでBashコマンドの実行確認を制御している人)
-
-【詳細】
-
-■ 新機能
-- サブエージェント(=作業を任せる補助的なAI)が出力した文章や思考過程を、stream-json形式の出力にも含められる新しいオプション(--forward-subagent-text)を追加した
-
-■ 修正
-- SlackなどのチャットにClaude Codeの実行確認メッセージを転送している場合、紛らわしい特殊文字によって承認メッセージの見た目が細工されてしまう問題を修正した
-- フックがBashコマンド実行時に「確認する」と判定しても、自動判断モード(auto)がそれを上書きして確認なしに実行してしまうことがあった不具合を修正した
-- 同じ認証情報を複数のセッション(=同時に開いているClaude Codeの会話)で共有している場合、パソコンをスリープから復帰させると全セッションが同時にログアウトしてしまう不具合を修正した
-- 待機状態だったウェブ版のセッションを再開したとき、プラグインが使うMCPサーバー(=外部機能と連携する仕組み)が再接続されず、次のメッセージまで呼び出しが失敗し続ける不具合を修正した
-- Vertex AIやBedrock経由で利用時、モデルを指定していても起動時にデフォルトのOpusモデルへ接続を試み、不要な切り替え通知が出る不具合を修正した
-- サブエージェントに特定のモデルを指定していても、会話を再開したり追加のメッセージを送ったりすると、指定が消えて親の会話と同じモデルに戻ってしまう不具合を修正した
-- プロジェクト側の設定を読み込まない設定にしていても、プロジェクト内の入れ子になったルールファイル(.claude/rules/*.md)が読み込まれてしまう不具合を修正した
-- ファイルをアップロードする際、ファイル名が「.prn」で終わるものや末尾がピリオドのものが誤って拒否される不具合を修正し、逆に複数の場所から参照されている(ハードリンクされた)ファイルは安全のため拒否するようにした
-- リモート環境やCLIから使っているセッションで、Claude in Chrome拡張機能へのファイルアップロードができない不具合を修正した
-- 入力欄の内容を編集した結果「?」だけが残る状態になると、その入力が無視されてショートカット一覧のパネルが開閉してしまう不具合を修正した
-- Claude in Chrome拡張機能を有効にしているのにChromeを起動していない場合に、起動処理がフリーズする不具合を修正した
-- その他、画面の読み込み表示が実際より遅れて消えるなど細かい不具合を修正
-- 停止したばかりのバックグラウンドセッションを一覧画面から開き直すと、同じセッションIDのまま中身が空の会話になってしまう不具合を修正した
-- 「/loop」を一度使うと、そのセッションが「/resume」の一覧に表示されなくなる不具合を修正した
-- スクリーンリーダー利用者が「/terminal-setup」や初回セットアップ後に、音による通知(ターミナルベル)が鳴らなくなる不具合を修正した
-- ANTHROPIC_AUTH_TOKENとANTHROPIC_BASE_URLを使ったゲートウェイ認証でバックグラウンドの処理を動かしている場合、裏で動くプロセスが再起動すると「ログインしていません」という表示に戻ってしまう不具合を修正した
-- gitが作業用の複製フォルダを認識できなくなった「claude agents」のジョブが、削除しても消せなくなる不具合を修正した。削除できない理由も一覧画面に表示されるようにした
-- 「/clear」を実行しても画面下部に表示される料金の合計がリセットされない不具合を修正し、以降は「/clear」後に0ドルから表示されるようにした
-- Windows環境で、Claude in Chromeのセットアップ画面がブラウザで開かない不具合を修正した
-- Windowsで画面表示なしの出力モード(print-mode)を使う際、標準入力を読み込めない状況だと処理が異常終了する不具合を修正した
-- 依頼内容にリンクが含まれていると、バックグラウンドセッションの一覧に表示されるタイトルが、タイトル生成用モデルの「対応できません」という拒否文言そのままになってしまう不具合を修正した
-- 利用者が手動で止めたバックグラウンドのAIが勝手に自動で復活し、しかも古い依頼内容をそのまま再実行してしまう不具合を修正した
-- 実行スケジュールを設定していない定期処理(ルーティン)で、次回実行予定が「西暦1年」と表示される不具合を修正した
-- Windowsで同期されるスキルやプラグイン用フォルダの命名処理を安全性を高める形で見直し、また「/clear」実行後もウェブ検索・取得の中継機能が動き続けるようにした
-- Claude in Chromeで、アップロードするファイルの保存場所の確認処理を安全性を高める形で見直した
-- Claude in Chromeで、スクリーンショットを撮る操作に「保存」を指定した際に実際には保存されず何も起きなかった不具合を修正し、画像をディスクに保存してその保存先を返すようにした
-- Bedrock・Vertex AI・Mantle・Foundry経由の利用で、本来は再利用されるはずのキャッシュ済み情報の末尾部分が毎回新規の入力として課金されてしまっていた不具合を修正した
-
-■ 変更
-- ターミナル画面のレイアウトと描画速度を改善した
-- バックグラウンドで動かしているAIの結果報告を改善し、まだ実行中のAIについては「実行中」と正しく伝え、実際に完了するまで結果をでっち上げずに待つようにした
-- 記憶用ファイル(メモリー)の容量が上限を超えたという警告が、実際に読み込まれる本文だけを基準に判定するよう改善し、管理用の見出し情報やHTMLコメントは容量計算に含めないようにした
-- タイムアウト時間やトークン数の上限、再試行回数などを環境変数で指定する際、「1e6」や「64_000」のような書き方も使えるようにした
-- ドキュメントへのリンク先を最新のサイトに更新した
-- 「常に許可」にした操作の設定が、これまでは分身の作業フォルダ(gitのworktree)ごとに保存されていたが、プロジェクトの一番上の階層に保存されるようになり、別のセッションや別の作業フォルダに切り替えても許可設定が引き継がれるようになった
-- 「/usage-credits」を実行したとき、組織の管理者にリクエストを送る前に確認を求めるようにした
-- Vim風の操作モードで、「s」「S」キー(文字/行の置き換え)がノーマルモード(通常の操作待ち状態)でも本家Vimと同じように使えるようにした
-- VSCode版で、「リモートコントロール」機能のバナー表示に、その機能が何をするものかの説明を追加した</div>
-<details><summary>原文リリースノート (37件)</summary><ul><li>Added `--forward-subagent-text` flag and `CLAUDE_CODE_FORWARD_SUBAGENT_TEXT` environment variable to include subagent text and thinking in stream-json output</li>
-<li>Fixed permission previews relayed to chat channels not neutralizing bidirectional-override, zero-width, and look-alike quote characters, so tool inputs cannot visually alter the approval message</li>
-<li>Fixed auto mode overriding a PreToolUse hook&#x27;s `ask` decision for unsandboxed Bash — a hook `ask` now floors the decision at a prompt</li>
-<li>Fixed parallel Claude Code sessions all logging out simultaneously after wake-from-sleep when many sessions share one credential store</li>
-<li>Fixed plugin MCP servers not reconnecting after an idle web session woke, leaving MCP calls failing until the next message</li>
-<li>Fixed Claude Code on Vertex and Bedrock attempting the default Opus model at startup and printing a spurious fallback notice when a model is explicitly configured</li>
-<li>Fixed subagents spawned with an explicit model override reverting to the parent&#x27;s model when resumed or sent a follow-up message</li>
-<li>Fixed nested `.claude/rules/*.md` files loading even when setting sources exclude project settings</li>
-<li>Fixed file upload validation: filenames ending in a DOS device suffix (`.prn`) or trailing dot are now accepted, and files with multiple hard links are refused</li>
-<li>Fixed file uploads to Claude in Chrome from remote and CLI sessions</li>
-<li>Fixed edits that leave the input as &quot;?&quot; being silently swallowed and toggling the shortcuts panel</li>
-<li>Fixed a startup hang when the Claude in Chrome extension is enabled but Chrome is not running</li>
-<li>Fixed a 300ms delay revealing async content (Settings tabs, Stats, diff views, and other loading states)</li>
-<li>Fixed reopening a just-stopped background session from the agents view starting a blank conversation under the same session id</li>
-<li>Fixed `/loop` hiding the session from `/resume` after a single use</li>
-<li>Fixed screen reader users losing the audible terminal bell after `/terminal-setup` or onboarding terminal setup</li>
-<li>Fixed background jobs on LLM gateway auth (`ANTHROPIC_AUTH_TOKEN` + `ANTHROPIC_BASE_URL`) coming back &quot;Not logged in&quot; after the daemon respawns them</li>
-<li>Fixed `claude agents` jobs becoming permanently undeletable when git no longer recognizes their worktree — the row now shows why the delete was refused instead of silently reappearing</li>
-<li>Fixed `/clear` not resetting the session cost counter — the statusline&#x27;s cost now starts at $0 after `/clear`</li>
-<li>Fixed Claude in Chrome setup pages failing to open in the browser on Windows</li>
-<li>Fixed headless print-mode sessions on Windows crashing or silently exiting when stdin is unreadable</li>
-<li>Fixed background session titles in the agents view showing the naming model&#x27;s refusal text when the prompt contains a link</li>
-<li>Fixed background agents killed by the user auto-respawning, and revived agents re-running stale prompts from old sessions</li>
-<li>Fixed routines with no schedule reporting a next run time in the year 1</li>
-<li>Hardened synced skill/plugin directory naming on Windows and kept CCR web fetch/search proxies working after `/clear`</li>
-<li>Improved terminal layout and rendering performance</li>
-<li>Improved background agent result reporting — Claude now reports the status of still-running agents and waits for the real completion instead of fabricating results</li>
-<li>Improved the memory index over-limit warning to measure only loaded content, excluding frontmatter and HTML comments</li>
-<li>Updated integer environment variables (timeouts, token budgets, retry counts) to accept scientific notation and digit-separator spellings like `1e6` and `64_000`</li>
-<li>Updated documentation links to the current docs sites</li>
-<li>Changed &quot;always allow&quot; permission rules to save at the repository root, so approvals granted in a git worktree persist across sessions and worktrees</li>
-<li>Changed `/usage-credits` to ask for confirmation before sending a request to organization admins</li>
-<li>Changed Vim mode `s` and `S` (substitute char/line) to work in NORMAL mode, matching vim behavior</li>
-<li>[VSCode] Updated the Remote Control banner to describe what it does</li>
-<li>Claude in Chrome: hardened file-upload path validation</li>
-<li>Claude in Chrome: `save_to_disk` on screenshot actions now writes the image to disk and returns the path; previously it did nothing</li>
-<li>Fixed a prompt-caching regression on Bedrock, Vertex, Mantle, and Foundry that billed the trailing system context block as fresh input tokens on every request.</li></ul></details>
 </article>
 </main>
 </body>
