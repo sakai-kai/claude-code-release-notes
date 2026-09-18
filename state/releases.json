@@ -1,6 +1,14 @@
 {
-  "last_version": "2.1.275",
+  "last_version": "2.1.276",
   "releases": [
+    {
+      "version": "2.1.276",
+      "notes": [
+        "Fixed every request failing with `400 … Input tag 'advisor_20260301'` when `ANTHROPIC_BASE_URL` points at a proxy or gateway (2.1.275 regression)"
+      ],
+      "summary_ja": "【概要】\nプロキシ経由でClaude Codeに接続していると全リクエストが失敗する不具合を修正(前バージョンで発生)\n\n【重要】\n- ANTHROPIC_BASE_URLで独自の中継サーバー(プロキシ/ゲートウェイ)を指定して接続している場合、全てのリクエストがエラーで失敗する不具合を修正(影響: プロキシやゲートウェイ経由でClaude Codeに接続している人)\n\n【詳細】\n\n■ 修正\n- ANTHROPIC_BASE_URLで独自の中継サーバー(プロキシ/ゲートウェイ)を指定して接続していると、「400 ... Input tag 'advisor_20260301'」というエラーで全てのリクエストが失敗する不具合を修正(直前のバージョンで新たに発生した不具合)",
+      "detected_at": "2026-09-18T07:37:42+00:00"
+    },
     {
       "version": "2.1.275",
       "notes": [
