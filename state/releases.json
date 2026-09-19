@@ -1,6 +1,15 @@
 {
-  "last_version": "2.1.277",
+  "last_version": "2.1.278",
   "releases": [
+    {
+      "version": "2.1.278",
+      "notes": [
+        "Changed auto mode for Claude API and Enterprise users, and on Bedrock, Vertex, Foundry and gateways, to default to the server-side classifier, which does not charge for classifier overhead (`CLAUDE_CODE_AUTO_MODE_SERVER=0` opts out on Bedrock, Vertex, Foundry and gateways); warns on billed fallback. See https://code.claude.com/docs/en/auto-mode-classifier-billing",
+        "Added an `Auto mode server` row to `/status` showing whether this session's auto mode classifier runs on the server"
+      ],
+      "summary_ja": "【概要】\nAuto モード(モデルを自動的に選ぶ機能)の判定処理をサーバー側で行うようになり、追加料金がかからなくなった。\n\n【重要】\n- Claude API/Enterprise 版や Bedrock、Vertex、Foundry、各種ゲートウェイ経由で Auto モードを使っている場合、これまでモデル選択の判定にかかっていた追加料金が発生しなくなった(影響: Auto モードを Claude API/Enterprise/Bedrock/Vertex/Foundry/ゲートウェイ経由で使っている人)\n- Bedrock/Vertex/Foundry/ゲートウェイ利用時は、環境変数 `CLAUDE_CODE_AUTO_MODE_SERVER=0` を設定すると、この新しい動作を無効にして元の課金方式に戻せる(影響: Bedrock/Vertex/Foundry/ゲートウェイ経由でこれまでの課金方式を維持したい人)\n- サーバー側での判定が行えず、従来どおり課金される方式に切り替わった場合は、警告が表示されるようになった(影響: Auto モードを使っている人全般)\n\n【詳細】\n\n■ 新機能\n- `/status` に「Auto mode server」という項目が追加され、今のセッションで Auto モードの判定がサーバー側で行われているかどうかを確認できるようになった\n\n■ 変更\n- Claude API/Enterprise 版、および Bedrock、Vertex、Foundry、各種ゲートウェイ経由の利用において、Auto モードのモデル選択判定がデフォルトでサーバー側で行われるようになり、判定処理にかかる追加料金が発生しなくなった(Bedrock/Vertex/Foundry/ゲートウェイでは `CLAUDE_CODE_AUTO_MODE_SERVER=0` でこの動作を無効化可能)。サーバー側判定が使えず従来の課金方式にフォールバックした場合は警告が表示される",
+      "detected_at": "2026-09-19T07:32:59+00:00"
+    },
     {
       "version": "2.1.277",
       "notes": [
