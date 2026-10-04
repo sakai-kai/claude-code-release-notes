@@ -45,10 +45,77 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-10-03 00:50 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-10-04 00:10 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.288 <span class="badge">NEW</span> <span class="date">2026-10-03</span></h2>
+<h2>v2.1.289 <span class="badge">NEW</span> <span class="date">2026-10-04</span></h2>
+<div class="summary">【概要】
+プラグインの画面表示や、コマンド・ファイルの実行を制限する権限ルールに関する不具合を中心に修正したバージョンです。
+
+【重要】
+- 閉じられていない`&lt;script&gt;`タグを多数含むコードブロックを表示すると画面が固まってしまう不具合を修正(影響: チャットでコードを貼り付ける人、公開した成果物を閲覧する人)
+- VSCode上でログアウトが意図せず頻発する不具合を修正(前バージョン2.1.288での変更を元に戻しました)(影響: VSCode拡張でClaude Codeを使う人)
+- 複数コマンドをつなげた場合や環境変数付きコマンド、別のファイルを指すリンク経由のアクセスで、拒否・確認の権限ルールが正しく適用されないことがある不具合を修正(影響: 許可・拒否の権限ルールを設定して安全にClaude Codeを使っている人)
+
+【詳細】
+
+■ 新機能
+- チームの仲間同士で呼び出せるサブエージェント起動機能`agent.spawn`を追加しました。また、プラグインの各処理をまたいで同じエージェントIDを使えるようにし、`$.agent.list()`で「待機中」「応答待ち」といった状態も確認できるようになりました。
+
+■ 修正
+- 複数のコマンドをつなげて実行する場合、拒否・確認の権限ルールが途中のコマンドに正しく適用されず、組織管理されたパソコンでは追加インストールしたプラグインの承認状態がそのまま通ってしまう不具合を修正しました。
+- 閉じられていない`&lt;script&gt;`タグを多数含む短いコードブロックや、`${}`の入れ子が深いコードブロックを表示すると、画面が固まってしまう不具合を修正しました。
+- 別のファイルを指すリンク(いわゆるショートカットファイル)になっているファイルをエディタ上で@指定・編集・選択した場合に、読み取りを拒否する権限ルールが適用されない不具合を修正しました。
+- [VSCode] 前バージョン(2.1.288)で行った`claude auth status`の変更を元に戻しました。この変更によりログアウトが意図せず頻発することがありました。
+- ローカルのフォルダから追加したプラグインの一覧・実行・更新で古い内容が表示されたままになる不具合と、リンクで指定したプラグインフォルダの変更が自動で反映されない不具合を修正しました。
+- アップグレード後、最初に開いたセッションで追加インストール済みのプラグインが読み込まれない不具合を修正しました。
+- 追加インストールしたプラグインが、組織が管理するMCPサーバーのログイン用ツールの説明文を書き換えられてしまう不具合を修正しました。
+- 起動時に、プラグインが対応していない種類の枠線を指定していると、画面が固まったり強制終了したりする不具合を修正しました。
+- バックグラウンドで動くセッションや他のエージェントが監督するセッションで、プラグインの画面処理が非同期に失敗するとセッションそのものが終了してしまう不具合を修正しました。
+- 高さがゼロの表示領域をプラグインが使い続けた場合に、セッションがエラーで終了してしまう不具合を修正しました。
+- `TZ=&quot;$HOME&quot; rm -rf build`のように環境変数を頭に付けたコマンドを自動実行の仕組みが安全と判断してしまい、本来は拒否・確認すべき権限ルールが適用されない不具合を修正しました。
+- コマンドの前に変数への代入だけが書かれている場合、自動実行の仕組みによって拒否・確認の権限ルールがすり抜けてしまう不具合を修正しました。
+- フォルダ内にマーケットプレイスの設定ファイルも置かれている場合、`claude plugin validate`がそのプラグインの検証をスキップしてしまう不具合を修正しました。
+- プラグインの画面描画処理が書き込んだ内容が原因で表示中の行がエラーになった場合、セッションが「復旧不能な表示エラー」で終了してしまう不具合を修正しました。これ以降は、その行の描画自体をシステム側で行うようにしています。
+- プラグインが表示する部分の一つが描画中に失敗すると、その周りに表示されていた他の内容までまとめて壊れてしまう不具合を修正しました。これ以降は失敗した部分だけが影響を受けるようになりました。
+- `claude plugin validate`が、Anthropic公式のマーケットプレイスに含まれるプラグイン自体の検証に失敗し、実際は問題のない`plugin.json`を`--json`出力で問題ありと表示してしまう不具合を修正しました。
+- 公開した成果物(アーティファクト)のページで、閉じられていない`&lt;script&gt;`タグを多数含む短いコードブロックがあると、閲覧者のブラウザタブが固まったり落ちたりする不具合を修正しました。
+- 画面描画中に端末側でエラーが発生すると、プラグインの表示部分がセッション中ずっと失敗した状態のままになる不具合を修正しました。
+- その他、プラグイン画面の文字のずれや重なり表示、特定のリンクで何も表示されない、エラー内容が空白になるなどの細かい表示上の不具合を修正しました。
+
+■ 変更
+- プラグインのコード表示画面で、大きなファイルを開く際の表示速度を改善しました。
+- プラグインの表示部分が描画に失敗した際、どのプラグインが原因で何も表示されなかったのかが分かりやすいメッセージになるよう改善しました。</div>
+<details><summary>原文リリースノート (27件)</summary><ul><li>Fixed a deny or ask rule on a nested part of a compound shell command not holding over a user-installed mod&#x27;s approval on managed machines</li>
+<li>Fixed the terminal freezing on short code blocks with many unclosed `&lt;script&gt;` tags or deeply nested `${` substitutions</li>
+<li>Fixed `Read` deny rules not applying to files @-mentioned, changed, or selected in the IDE through a symlink</li>
+<li>[VSCode] Reverted a 2.1.288 change to `claude auth status` that may have made sign-outs more frequent</li>
+<li>Improved how quickly large files open in a plugin code pane by laying the highlighted view out once at its final width</li>
+<li>Fixed `plugin list`, `plugin eval` and `plugin update` showing a stale copy of a plugin installed from a local folder marketplace, and hot reload for a symlinked `--plugin-dir`</li>
+<li>Fixed installed mods not loading in the first session after an upgrade</li>
+<li>Fixed a plugin&#x27;s rows above the prompt showing a stale row while the Background tasks dialog was open in fullscreen</li>
+<li>Fixed plugin panes drawing nothing when a link used a localhost address, an `@` in its path, an uppercase host or a `file:` path</li>
+<li>Fixed a user-installed plugin being able to rewrite the descriptions of an organization-managed MCP server&#x27;s sign-in tools</li>
+<li>Fixed a freeze or forced quit at launch when a plugin drew a Box with a border style the terminal does not know</li>
+<li>Fixed supervised and background sessions ending when a plugin&#x27;s on-screen handler threw asynchronously</li>
+<li>Fixed sessions ending with an interface error when a plugin region with no height kept growing</li>
+<li>Fixed Bash deny and ask rules missing a command behind an environment variable prefix with an expanded value (e.g. `TZ=&quot;$HOME&quot; rm -rf build`) when the sandbox auto-allows commands</li>
+<li>Fixed a Bash deny or ask rule being skipped under sandbox auto-allow when a bare variable assignment came before the command</li>
+<li>Fixed `claude plugin validate` skipping the plugin when the folder also holds a marketplace manifest</li>
+<li>Added `agent.spawn` for teammates, one agent id across plugin hook events, and idle and waiting states in `$.agent.list()`</li>
+<li>Fixed sessions ending with &quot;unrecoverable interface error&quot; when a value a mod&#x27;s `ui.render` hook wrote made a row throw while drawn; the engine now draws its own row instead</li>
+<li>Fixed text with a tab, a stray escape and a C1 control, or a short text with a tab and CRLF line endings, drawing over the rows below it</li>
+<li>Fixed right-aligned content in a mod&#x27;s pane or band drawing under the close mark or `[-]`, which now also keep one column in from the terminal&#x27;s edge</li>
+<li>Fixed a mod&#x27;s `Client` that fails while drawn taking down everything the mod drew around it; it now fails alone and raises `ui.fault`</li>
+<li>Fixed `claude plugin validate` failing an Anthropic marketplace&#x27;s own plugin and listing a clean `plugin.json` in `--json`</li>
+<li>Fixed a mod&#x27;s band that fails to draw briefly telling the cards under it to step aside</li>
+<li>Fixed a failed plugin component showing `Error` or nothing as its reason when the failure carried no message</li>
+<li>Improved the line a mod&#x27;s author sees when its band or pane fails to draw: it names the mod and says nothing was drawn</li>
+<li>Fixed published artifact pages freezing or crashing the reader&#x27;s browser tab on short code blocks with many unclosed `&lt;script&gt;` tags</li>
+<li>Fixed a mod&#x27;s Client region staying failed for the whole session after the terminal threw while drawing it</li></ul></details>
+</article>
+<article>
+<h2>v2.1.288 <span class="date">2026-10-03</span></h2>
 <div class="summary">【概要】
 セッション再開やプラグイン、権限周りの不具合を中心に多数修正した更新です。
 
@@ -5263,58 +5330,6 @@ Slackなど事前登録済みの認証設定を使うMCPサーバーで、サイ
 <li>[VSCode] &quot;Report a problem&quot; and `/bug` now open the built-in feedback dialog instead of a retired survey link</li>
 <li>[VSCode] Made the `/btw` side-question panel resizable by dragging its boundary, in both side-docked and stacked layouts</li>
 <li>[VSCode] Added session groups in the sidebar — right-click to create, rename, or delete; Cmd/Ctrl- or Shift-click to move several sessions at once</li></ul></details>
-</article>
-<article>
-<h2>v2.1.228 <span class="date">2026-08-11</span></h2>
-<div class="summary">【概要】
-画面が固まる、CI実行環境で毎回失敗するなど複数の不具合を修正した更新です。
-
-【重要】
-- 作業中に画面の表示が完全に止まってしまい、プロセス自体は動き続けているのに操作ができなくなる不具合を修正(影響: ターミナルで対話的にClaude Codeを使っている人)
-- セッションを片付ける処理が、プロジェクトの記憶(メモリー)を保存しているフォルダの中身まで消してしまう不具合を修正(影響: メモリー機能でプロジェクトの情報を保存している人)
-- セルフホストランナー(自分のマシンやサーバーで自動実行するCI環境)で、更新を反映しないリポジトリの取得処理が失敗すると、新しい実行環境を使うたびに必ずセッションが失敗する不具合を修正(影響: セルフホストランナーでClaude Codeを自動実行している人)
-
-【詳細】
-
-■ 修正
-- 対話的なセッション中に、まれに発生する内部の表示処理のエラーをきっかけに、プロセスは動き続けているのに画面の表示が完全に止まってしまう不具合を修正
-- WindowsでClaude Codeをgitインストール先の親フォルダから起動すると、gitやGit Bashが見つからなくなる不具合を修正
-- /model でモデルを変更した後に /tui を使うと、セッションが以前のモデルに戻ってしまう不具合を修正
-- 複数セッション間のメッセージ機能で、インストールやアップグレード直後の最初のセッションにメッセージの受信箱が用意されないことがある不具合を修正
-- リモートコントロール機能で接続中に /resume を使うと、再開した会話のタイトルや内容が接続先のセッションに漏れて表示されることがある不具合を修正
-- セルフホストランナーで、更新を反映しないリポジトリの取得処理が失敗すると、新しい実行環境を使うたびに必ずセッションが失敗する不具合を修正。該当のリポジトリは警告を表示したうえでスキップされるように変更
-- セルフホストランナーで、バックグラウンドの作業が終わってから次のやり取りが始まるまでの合間にセッションが終了してしまう不具合を修正
-- セッションを片付ける処理が、プロジェクトの記憶(メモリー)を保存しているフォルダの中身まで消してしまう不具合を修正
-- バックグラウンドで行われるプラグインの保存データの整理処理が、開発中でリンク参照しているだけのプラグインの保存データまで消してしまう不具合を修正
-- 複数の設定ファイルを組み合わせて使っている場合に、優先度の高い設定でプラグイン配布元の情報を上書きすると、別の設定ファイルの独自ヘッダー情報を意図せず引き継いでしまう不具合を修正。プラグイン配布元の情報はまとめて上書きされるように変更
-- スキルを実行した後、あとで使う追加機能についての案内が誤って2回送られてしまうことがある不具合を修正
-
-■ 変更
-- claude.aiと同期したスキルについて、手元のコマンドやMCP(外部ツール連携)の定型文を上書きしないようにし、説明文を無害化した上でどこから来たものか分かるように表示し、コマンド実行やファイル読み込みを勝手に行わないように安全性を強化
-- 複数セッション間のメッセージ機能を改善し、送信者と本文がその場で表示されるようになり、別のマシンのリモートコントロール接続先へのメッセージには送信元のセッション名が表示されるように変更
-- Vertex AI利用時、Google Cloudの認証情報が期限切れまたは未設定の場合に、数分間再試行し続けるのではなく数秒で失敗を通知するように改善
-- 会話ログを整理する処理の進行状況表示を改善し、進捗バーだけでなく再試行までの秒数や処理が止まっている場合のヒントも表示されるように変更
-- 新しいモデルでは、今回のセッションでまだ読み込んでいない既存ファイルでも上書きできるように変更(ファイル編集機能と同じ挙動)。古いモデルでは引き続き事前の読み込みが必要
-- Pro、Max、Teamプランの初回利用時の案内から、自動モードのセッションが少し割高になるという古い記載を削除
-- その他、一部のターミナルでタブの表示がちらつく問題を減らすため処理中アイコンの見た目を調整するなど細かい改善を実施</div>
-<details><summary>原文リリースノート (18件)</summary><ul><li>Fixed interactive sessions that could stop redrawing entirely, while the process kept running, after a rare internal layout error</li>
-<li>Fixed `git` / Git Bash not being found on Windows when Claude Code is launched from a parent folder of the git installation</li>
-<li>Fixed `/tui` reverting the session to an earlier model when `/model` had been changed since the last response</li>
-<li>Fixed cross-session messaging sometimes starting without an inbox in the first session after install or upgrade</li>
-<li>Fixed Remote Control `/resume` while connected leaking the resumed conversation&#x27;s title or history into the connected session</li>
-<li>Fixed `claude self-hosted-runner` sessions failing on every fresh runner when the `checkout` hook fails for a repository the session doesn&#x27;t push to; that repository is now skipped with a warning</li>
-<li>Fixed self-hosted runners ending sessions in the gap between a background task finishing and the follow-up turn starting</li>
-<li>Fixed session cleanup deleting contents inside a project&#x27;s memory folder</li>
-<li>Fixed background plugin-cache cleanup deleting a plugin&#x27;s cache when its only version is a symlinked development checkout</li>
-<li>Fixed a settings-merge issue where a marketplace entry redefined in a higher-precedence settings tier could inherit another tier&#x27;s custom headers; marketplace entries now merge as whole entries</li>
-<li>Fixed the deferred-tools reminder occasionally being sent to the model twice after a skill invocation</li>
-<li>Hardened skills synced from claude.ai: they no longer shadow local commands or MCP prompts, their descriptions are sanitized and labeled, and on your machine their bodies don&#x27;t run `!` commands or expand `@` files</li>
-<li>Improved cross-session messages: the sender and body now display inline instead of a collapsed line, and messages to Remote Control sessions on other machines show your Remote Control session name as the sender</li>
-<li>Improved Vertex AI credential handling: expired or missing Google Cloud credentials now fail within seconds instead of retrying for minutes</li>
-<li>Improved compaction progress: the retry countdown and stall hint now appear during compaction instead of only a progress bar</li>
-<li>Updated terminal title busy-spinner glyphs to reduce tab-bar jitter on some terminals</li>
-<li>Changed the Write tool so newer models can overwrite an existing file they haven&#x27;t read this session, matching the Edit tool&#x27;s rules; older models still require the read first</li>
-<li>Removed the outdated note about auto mode sessions costing slightly more from the first-use notice for Pro, Max, and Team plans</li></ul></details>
 </article>
 </main>
 </body>
