@@ -1,6 +1,15 @@
 {
-  "last_version": "2.1.290",
+  "last_version": "2.1.291",
   "releases": [
+    {
+      "version": "2.1.291",
+      "notes": [
+        "Fixed a regression in 2.1.290 where cloud sessions could drop answers to permission prompts",
+        "Fixed a regression in 2.1.288 where the last messages of a session could be lost when quitting"
+      ],
+      "summary_ja": "【概要】\nセッション終了時の会話の消失と、クラウド上での許可確認の応答欠落を直した修正版。\n\n【重要】\n- 終了時にセッション末尾のメッセージが失われる不具合(2.1.288 で発生)を修正した。(影響: 2.1.288 以降を使い、作業後に Claude Code を終了して後から会話を見返している人)\n- クラウド上のセッションで、許可確認への返答が失われることがある不具合(2.1.290 で発生)を修正した。(影響: 2.1.290 を使い、クラウド上のセッションで許可確認に答えながら作業している人)\n\n【詳細】\n\n■ 修正\n- 2.1.290 で、クラウド上のセッションにおいて許可確認への返答が失われることがある不具合を修正した\n- 2.1.288 で、終了時にセッション末尾のメッセージが失われることがある不具合を修正した",
+      "detected_at": "2026-10-06T09:26:33+00:00"
+    },
     {
       "version": "2.1.290",
       "notes": [

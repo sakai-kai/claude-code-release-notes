@@ -45,10 +45,27 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-10-06 01:58 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-10-06 09:26 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.290 <span class="badge">NEW</span> <span class="date">2026-10-06</span></h2>
+<h2>v2.1.291 <span class="badge">NEW</span> <span class="date">2026-10-06</span></h2>
+<div class="summary">【概要】
+セッション終了時の会話の消失と、クラウド上での許可確認の応答欠落を直した修正版。
+
+【重要】
+- 終了時にセッション末尾のメッセージが失われる不具合(2.1.288 で発生)を修正した。(影響: 2.1.288 以降を使い、作業後に Claude Code を終了して後から会話を見返している人)
+- クラウド上のセッションで、許可確認への返答が失われることがある不具合(2.1.290 で発生)を修正した。(影響: 2.1.290 を使い、クラウド上のセッションで許可確認に答えながら作業している人)
+
+【詳細】
+
+■ 修正
+- 2.1.290 で、クラウド上のセッションにおいて許可確認への返答が失われることがある不具合を修正した
+- 2.1.288 で、終了時にセッション末尾のメッセージが失われることがある不具合を修正した</div>
+<details><summary>原文リリースノート (2件)</summary><ul><li>Fixed a regression in 2.1.290 where cloud sessions could drop answers to permission prompts</li>
+<li>Fixed a regression in 2.1.288 where the last messages of a session could be lost when quitting</li></ul></details>
+</article>
+<article>
+<h2>v2.1.290 <span class="date">2026-10-06</span></h2>
 <div class="summary">【概要】
 定期実行タスクの復元や権限チェックの抜けなど、多数の不具合修正が中心のリリース
 
@@ -5631,20 +5648,6 @@ Windowsの不具合修正とセキュリティ強化に加え、GitLab対応や�
 <li>Hardened the Linux filesystem sandbox against a protected-path bypass</li>
 <li>Changed `sandbox.ripgrep` to be honored only from user, managed, and `--settings` settings; project settings can no longer override the sandbox&#x27;s ripgrep binary</li>
 <li>Removed the startup tip suggesting you create custom subagents, and the matching nudge in the `/powerup` tour</li></ul></details>
-</article>
-<article>
-<h2>v2.1.231 <span class="date">2026-08-13</span></h2>
-<div class="summary">【概要】
-Slackなど事前登録済みの認証設定を使うMCPサーバーで、サインインが失敗する不具合を修正
-
-【重要】
-- 認証後にアプリへ戻る転送先のURLが一致せず、SlackなどのMCPサーバーにサインインできなかった問題を修正(影響: SlackなどのMCPサーバーと連携してログインを行う人)
-
-【詳細】
-
-■ 修正
-- SlackのようにOAuth連携用の設定があらかじめ登録されているMCPサーバーで、認証後にアプリへ戻る転送先のURLが一致せずサインインに失敗していた問題を修正</div>
-<details><summary>原文リリースノート (1件)</summary><ul><li>Fixed MCP OAuth sign-in failing with a redirect URI mismatch for servers that use a pre-registered OAuth client, such as Slack</li></ul></details>
 </article>
 </main>
 </body>
