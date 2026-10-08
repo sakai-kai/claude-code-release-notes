@@ -1,6 +1,15 @@
 {
-  "last_version": "2.1.293",
+  "last_version": "2.1.294",
   "releases": [
+    {
+      "version": "2.1.294",
+      "notes": [
+        "Fixed `prompt` and `agent` hooks written as instructions (such as \"Block commands that...\") allowing what they should block",
+        "Improved how `prompt` hooks on Stop and SubagentStop written as instructions (such as \"Carry on if the build is broken\") are judged, so Claude is less likely to stop early"
+      ],
+      "summary_ja": "【概要】\n指示文の形式で書いたフック(=特定のタイミングで自動実行される確認処理)が、止めるべき操作を見逃す問題を修正。\n\n【重要】\n- 「〜するコマンドをブロックする」のような指示文で書いた `prompt` / `agent` フック(=特定のタイミングで自動実行される確認処理)が、止めるべき操作を見逃していた問題が修正された。(影響: 危険な操作を防ぐためにフックを設定している人)\n\n【詳細】\n■ 修正\n- 「〜するコマンドをブロックする」のような指示文で書いた `prompt` / `agent` フックが、本来止めるべき操作を許可してしまう問題を修正\n\n■ 変更\n- Stop・SubagentStop(=Claude や サブエージェントが作業を終えるタイミング)の `prompt` フックを「ビルドが壊れていれば続行する」のような指示文で書いた場合の判定を改善し、Claude が作業を途中で切り上げにくくなった",
+      "detected_at": "2026-10-08T09:31:02+00:00"
+    },
     {
       "version": "2.1.293",
       "notes": [
