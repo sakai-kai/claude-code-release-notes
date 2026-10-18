@@ -1,6 +1,14 @@
 {
-  "last_version": "2.1.302",
+  "last_version": "2.1.303",
   "releases": [
+    {
+      "version": "2.1.303",
+      "notes": [
+        "Bug fixes and reliability improvements"
+      ],
+      "summary_ja": "【概要】\nClaude Code v2.1.303 は、動作の安定性を高める不具合修正が中心のリリースです。\n\n【重要】\n- 特になし\n\n【詳細】\n\n■ 修正\n- 不具合の修正と安定性の向上を行った(原文に具体的な内容の記載なし)",
+      "detected_at": "2026-10-18T23:44:04+00:00"
+    },
     {
       "version": "2.1.302",
       "notes": [
