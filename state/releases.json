@@ -1,6 +1,15 @@
 {
-  "last_version": "2.1.305",
+  "last_version": "2.1.306",
   "releases": [
+    {
+      "version": "2.1.306",
+      "notes": [
+        "Fixed `claude -p` inside cloud sessions reporting \"Not logged in\" when started without the session's environment variables",
+        "Fixed an API error being replaced by \"prompt is too long\", and an unneeded compaction, in sessions with many MCP tools"
+      ],
+      "summary_ja": "【概要】\nクラウド環境での `claude -p` のログイン誤判定と、MCPツールが多い場合の誤エラー表示を修正した。\n\n【重要】\n- 特になし\n\n【詳細】\n\n■ 修正\n- クラウド上のセッションで、そのセッション用の環境変数(=実行環境に渡される設定値)を渡さずに `claude -p` を起動すると、ログイン済みなのに「Not logged in」と表示される問題を修正した\n- MCPツール(=外部サービスと連携する拡張機能)を多数使っているセッションで、本来のAPIエラーが「prompt is too long」という別のエラーに置き換わって表示され、不要な会話の圧縮(=長くなった履歴の自動要約)も実行されてしまう問題を修正した",
+      "detected_at": "2026-10-21T08:00:53+00:00"
+    },
     {
       "version": "2.1.305",
       "notes": [
