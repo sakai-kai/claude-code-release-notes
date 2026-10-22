@@ -1,6 +1,14 @@
 {
-  "last_version": "2.1.307",
+  "last_version": "2.1.308",
   "releases": [
+    {
+      "version": "2.1.308",
+      "notes": [
+        "Bug fixes and reliability improvements"
+      ],
+      "summary_ja": "【概要】\n安定性を高める不具合修正と信頼性の改善が行われた。\n\n【重要】\n- 特になし\n\n【詳細】\n■ 修正\n- 不具合の修正と信頼性の向上を実施(具体的な内容は原文に記載なし)",
+      "detected_at": "2026-10-22T07:58:49+00:00"
+    },
     {
       "version": "2.1.307",
       "notes": [
