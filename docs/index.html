@@ -45,10 +45,185 @@
 <main>
   <header>
     <h1>Claude Code リリースノート</h1>
-    <p>最終更新: 2026-10-22 07:58 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
+    <p>最終更新: 2026-10-23 00:13 UTC ・ <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md">公式 CHANGELOG</a> を自動監視して日本語要約を掲載しています</p>
   </header>
 <article>
-<h2>v2.1.308 <span class="badge">NEW</span> <span class="date">2026-10-22</span></h2>
+<h2>v2.1.309 <span class="badge">NEW</span> <span class="date">2026-10-23</span></h2>
+<div class="summary">【概要】
+サンドボックスと権限確認の抜けを多数修正し、VS Code や Slack 連携も改善した版。
+
+【重要】
+- サンドボックス(=コマンドを隔離して安全に実行する仕組み)で、シェルの起動設定ファイルが隔離の外で毎回実行されていた問題を修正 (影響: macOS や Linux でサンドボックス付きの Bash コマンドを使っている人)
+- `sed -i` は通常の Bash 確認画面が出て、書いたとおりに実行される。ファイル編集のプレビュー表示はなくなり、`/rewind` でも元に戻せなくなった (影響: Claude に `sed -i` でファイルを書き換えさせている人)
+- 巨大な入れ子の CLAUDE.md(=サブフォルダに置いた指示ファイル)を読むと、会話の圧縮が繰り返し起きる問題を修正。上限を超える場合は先頭部分だけ読み込む (影響: 大きな CLAUDE.md をサブフォルダに置いている人)
+
+【詳細】
+■ 新機能
+- [VSCode] 証明書の検証に失敗したときの対処法を、ログに警告として出すようにした。音声入力や拡張機能の通信が、通信内容を検査するプロキシ経由で失敗する場合などが対象
+
+■ 修正
+- サンドボックス付きの Bash コマンドで、シェルの起動設定ファイルが毎回、隔離の外で実行されていた問題を修正 (macOS・Linux)
+- macOS のサンドボックスで、書き込み禁止(`denyWrite`)のパターンが、ショートカット的なリンク(=シンボリックリンク)経由のフォルダだと実際の場所に効かない問題を修正
+- サンドボックス内のコマンドや自動承認された編集が、`--mcp-config` で渡した MCP 設定ファイルを書き換えられる問題を修正
+- 無効にした MCP サーバーが、後続の権限確認をきっかけに再接続される問題を修正 (print モードと SDK 経由のセッション)
+- リダイレクト(=出力先ファイルへの書き込み)が失敗しうるコマンドで設定された変数を、Bash の権限チェックが信用してしまう問題を修正
+- `cd` を包んだり前置きしたりして、git の前にフォルダ移動する複合コマンドで、通常の `cd` と同じように確認が出ない場合があった問題を修正
+- `Edit(パス)` の拒否ルールが、サブシェル(=括弧で囲んだ別実行)を含むコマンドの Bash リダイレクトを止められない場合があった問題を修正
+- ワークツリー(=作業用に分けた別フォルダ)で隔離したセッションが、ロケール指定を前置きした一部のコマンドを本来は拒否すべきなのに受け付けていた問題を修正
+- zsh のワークツリー隔離セッションが、一部の算術式コマンドを本来は拒否すべきなのに受け付けていた問題を修正
+- Claude Code が作るワークツリーやブランチ切り替えが、git の置き換え参照(replace refs)を無視するよう修正。他の git 操作はすでに無視していた
+- 設定フォルダにリンク経由でアクセスしている場合に、プロファイル保存場所の書き込み保護が効かない問題を修正
+- 巨大な入れ子の CLAUDE.md を読んだあと、会話の圧縮が繰り返される問題を修正。上限を超える入れ子の CLAUDE.md は先頭部分だけ読み込む
+- ctrl+enter(今すぐ送信)が、応答開始前に押したときしか送信待ちにならず、プロンプトのフック処理中に押すと、フックをやり直しつつメッセージは待機のままになる問題を修正
+- `!` モード(シェル入力)で、キーに割り当てたスラッシュコマンドがシェルとして実行されてしまう問題を修正
+- ctrl+o で、まだ届いていない他のエージェントやセッションからのメッセージが見えない問題を修正。会話履歴の下に「待機中」の印付きで全文が表示される
+- 長いツール出力のプレビューが絵文字の途中で切れ、セッションの記録を `jq` で読めなくなる問題を修正
+- Linux のサンドボックスが親と `/proc` を共有している場合に、PDF のページ範囲を Read すると「File does not exist」と出る問題を修正
+- Claude Desktop 上のセッションで、接続の更新時にメッセージが失われることがある問題を修正
+- 同じパソコンのターミナルが別のアカウントや組織でログインしていると、Claude デスクトップアプリの Claude Code セッションで機能が欠ける問題を修正
+- `claude remote-control` のステータス行が、git 管理外のフォルダでブランチ名を `HEAD` と表示する問題を修正
+- 分割ペインのエージェント(チームメイト)が、リーダーのコマンドラインで指定したツール拒否ルールと `--tools` の指定を引き継がない問題を修正
+- `/rename` で付けた名前が、VS Code のウィンドウ再読み込み後や非対話の `--resume` 後に、他のセッションからは自動生成名で見える問題を修正
+- `/rewind` の一覧が、`/code-review --fix`・サブエージェント・シェルコマンドでチェックポイント対象のファイルを変えたターンを「No code changes」と表示する問題を修正
+- `/privacy-settings` の「Help improve our AI models」が古い値を表示する問題を修正。取得できないときはその旨も表示する
+- 組織がフィードバックを受け付けていない場合に「後で再試行を」と出る問題を修正。サーバーが返す理由と不具合の報告先が表示される
+- 大きすぎる /feedback の報告が失敗する問題を修正。会話記録を外して再送する
+- `--add-dir` で追加したフォルダのスキルが、同名のスキルがあると使えない問題を修正。`&lt;フォルダ名&gt;:&lt;スキル名&gt;` として表示される
+- シェルでファイルを変更した場合に、`/verify` と `/code-review` が入れ子パッケージ固有のスキルを見つけられない問題を修正
+- /claude-api スキルが、`ant beta:worker poll --on-work` はコマンドにトレース情報(=処理の追跡用情報)を渡すと誤って説明していた問題を修正
+- /claude-api スキルの C# 向けトレース設定で、クラウド基盤向けクライアントの処理が抜ける問題を修正
+- /claude-api スキルが、Claude Platform on AWS へのリクエストの API スパンは呼び出し元のトレースに加われないと誤って説明していた問題を修正
+- PowerShell で動くフックが、終了コード 2 で止まらない問題を修正。また Windows で Git for Windows 未導入のとき、`&quot;shell&quot;: &quot;powershell&quot;` の `PreToolUse` と `PermissionRequest` フックが止めずに通してしまう問題も修正
+- モッド(=Claude の動作を拡張する仕組み)の `turn.step` フックで `haiku` のような別名のモデルを指定すると、毎回モデルエラーになる問題を修正。別名が正しいモデルに解決される
+- claude.ai から同期したプラグインやスキルが、ディスク読み取りエラーの後に、ときには作業中でも削除される問題を修正
+- 一部の通常のページ(特定の圧縮済みスクリプトを含むもの、Claude が先に読めなかったアーティファクトなど)で、アーティファクトの公開や更新が拒否される問題を修正
+- 会話が圧縮されたターンで、そのターンの残りのあいだアーティファクト更新のたびに許可を求められる問題を修正
+- `ANTHROPIC_BEDROCK_BASE_URL` を標準の `bedrock-runtime.&lt;region&gt;.amazonaws.com` に設定していると、Amazon Bedrock で細かい単位のツールストリーミングが無効のままになる問題を修正
+- 接続維持の信号しか返さないゲートウェイ経由で、「Waiting for API response」の表示がちらつく問題を修正。Anthropic のバックエンド以外の経路では 45 秒待つようになった
+- PR・Issue・コメントに役割名やプレースホルダーを書いたとき、メンションと解釈されて無関係な GitHub ユーザーに通知が飛ぶ問題を修正
+- バックグラウンドのコマンドがセッションより長く残ると、サンドボックスの書き込み禁止が解除される問題を修正 (Linux)
+- 現在のフォルダを対象に余分な引数を付けた `Set-Location` や `cd` が、PowerShell の権限チェックで自動承認される問題を修正。確認が出るようになった (Windows)
+- Xcode やコマンドラインデベロッパツールが入っていない Mac で、起動のたびに「Install Command Line Developer Tools」ダイアログが開く問題を修正 (macOS)
+- セルフホストランナーで、最初のプロンプト(`/code-review` など)がサブエージェントで作業中なのに `--startup-timeout-min` でセッションが止められる問題を修正。固まったプロセスは引き続き停止される
+- [VSCode] 編集部分のキャッシュが不完全だと Claude パネルが空白のままになる問題を修正。自動復旧するか、原因と対処法が表示される
+- [VSCode] メッセージを送らずに新規セッションを始めるたび、セッション履歴に空の「Untitled」が増える問題を修正
+- [VSCode] `/goal` など長いスラッシュコマンドのメッセージがチャット欄を占領する問題を修正。他のプロンプトと同様に「Show more」で折りたたまれる (anthropics/claude-code#97469)
+- [VSCode] チャット欄を狭くしても、長いメッセージが「Show more」で折りたたまれない問題を修正
+- [VSCode] チャット入力欄の Ctrl+J が常に改行になる問題を修正。~/.claude/keybindings.json の Chat で &quot;ctrl+j&quot; を null にすると VS Code や OS 側に任せられる
+- [VSCode] モッドの「From the … plugin」ラベルが、スラッシュコマンドや @ メンションのメニューに重なって表示される問題を修正 (anthropics/claude-code#102981)
+- [VSCode] コピーした LaTeX 数式を貼り付けると、空の箇条書き・段落・コードブロックができたり、箇条書きの番号が 1 から振り直されたりする問題を修正
+- [VSCode] 組織がフィードバックを受け付けていない場合、エラーに HTTP ステータスしか出ない問題を修正
+- [クラウドセッション] ルーチンのフォームで、「コネクタを追加」の一覧が読み込み中なのに「利用可能なコネクタなし」と表示される問題を修正
+- [クラウドセッション] クラウド環境エディタで、環境変数の順序が入れ替わったり、2 種類の引用符を両方含む値にバックスラッシュが追加されたりする問題を修正
+- [クラウドセッション] 管理設定のセルフホスト環境の詳細ダイアログで、内容だけがスクロールし、タイトル・タブ・ボタンは表示されたままになるよう修正
+- [クラウドセッション] クラウドセッションの「ドキュメントを読む」ツールの行が、読みやすいページでなくエスケープされた JSON を表示する問題を修正
+- [Claude Tag] Slack で、チャンネル宛てに承認した下書きが誤って自分の DM に投稿される問題を修正。チャンネル指定のない投稿は拒否され、承認したチャンネルに送れる
+- [Claude Tag] Slack の承認カードの Allow と Deny が、セッション停止後は何も起きない問題を修正。回答するとセッションが再開する
+- [Claude Tag] Slack のワークスペースが別の Claude 組織に移った後、チャンネルのタグなしメッセージを Claude が無視する問題を修正(Enterprise Grid の未共有チャンネルを含む)
+- [Claude Tag] Slack のチャンネルで、スレッドに直前に追加された新しいメッセージを読む前に返信を投稿してしまう問題を修正
+- [Claude Tag] Claude Tag 管理設定の Slack ページで、一覧の読み込みに失敗すると「ワークスペース未接続」と表示される問題を修正。エラーと再試行ボタンが出る
+- [Code Review] レビュー結果のチェック作成が何度か失敗すると、完了したレビューなのに PR にチェックが出ない問題を修正。最後にもう一度試して完了済みのチェックを追加する
+- [Code Review] 実行中のレビューの後ろに待機していた push が、`@claude review stop` の後にレビューを開始してしまう問題を修正。チェックは閉じられ、理由が表示される
+
+■ 変更
+- `sed -i` は通常の Bash 確認画面が出て書いたとおりに実行されるようになった。ファイル編集のプレビュー表示はなくなり、他の Bash による編集と同じく `/rewind` では元に戻せない
+- `claude ultrareview` は、作業フォルダを信頼する確認が必須になった。ターミナルでは確認が出て、それ以外では拒否される。スクリプトでは `--trust-workspace`(値は取らない。PR 番号やベースブランチはその前に置く)を付けるか、`CLAUDE_CODE_DISABLE_ULTRAREVIEW_TRUST_CHECK=1` を設定する
+- Desktop アプリと VS Code の権限バイパスモードで、危険な `rm` や `rmdir` の確認が出る代わりに、書き換えのヒント付きで即座に拒否されるようになった。無人のセッションが止まらず進む
+- 設定でサンドボックスの対象外にしたコマンドは、サンドボックスが有効なのに動かせない状態のとき、書き込み許可リストのパスへの書き込み前に確認が出る。サンドボックスなしでの代替実行は拒否される
+- ワークツリーの作成と再利用で、git が必要なデータを都度取得しなくなった。通常のクローンと、Bash サンドボックスを設定した部分クローンが対象で、後者は先にデータを取得する
+- Windows で Claude Code が内部で実行する多くの git コマンドが速くなった。全プラットフォームで、それらのエラーは git の言語設定に関わらず英語で表示される
+- フックのモジュールが深く入れ子になりすぎて読み込めないとき、スタックオーバーフローの生のメッセージでなく、該当ファイル名を示すエラーになった
+- ディスクが満杯のときの扱いを改善。Bash コマンドが満杯で中断された場合はその旨と空けるべきフォルダを表示し、一時領域が満杯での起動時は生の ENOSPC エラーでなく分かりやすいメッセージを出す
+- /claude-api スキルが、OpenTelemetry の追加を頼まれたとき、SDK のトレースに加えて API のトレースも提案するようになった
+- /claude-api スキルが、機能が未対応と答える前に最新のドキュメントを確認するようになった
+- セルフホストランナーで、セッションが新しいランナーに移るとき、中断されたツール呼び出しが「結果不明」の印付きで Claude に見えるようになった
+- 同梱の dataviz スキルを更新。文字のコントラスト指標として APCA を使えるようにし(AA 準拠が必要な場面では WCAG 2 の比率を維持)、パレット検証スクリプトに `apca(text, background)` 関数を追加。色付きグラフの塗りの上のラベルを白と黒に近い色のどちらにするかも示す
+- /claude-api スキルを更新。サービスアカウントキーと Workload Identity Federation トークンで OpenTelemetry の送信先を管理できるようになった
+- /claude-api スキルが、Managed Agents のサブエージェントチームを `coordinator` でなく、動的ワークフロー既定オン付きの `multiagent_20261001` で構築するようになった
+- [VSCode] チャット欄の Edit と Write が速くなった。編集後に新しい問題を待つ時間が、多くの場合 1〜1.5 秒から 0.75 秒になった
+- [クラウドセッション] クラウドセッションの Changes ペインが、プッシュ済みコミットだけ、または Claude の編集だけを表示している場合にその旨を表示するようになった</div>
+<details><summary>原文リリースノート (79件)</summary><ul><li>Fixed sandboxed Bash commands on macOS and Linux running the shell&#x27;s startup files outside the sandbox before each command</li>
+<li>Fixed macOS sandbox `denyWrite` glob patterns not applying at a path&#x27;s real location when the pattern&#x27;s folder is reached through a symlink</li>
+<li>Fixed sandboxed commands and auto-accepted edits being able to modify the MCP config file passed with `--mcp-config`</li>
+<li>Fixed a disabled MCP server being reconnected by a later permission prompt in print and SDK sessions</li>
+<li>Fixed the Bash permission check trusting a variable set by a command whose redirect can fail to open</li>
+<li>Fixed Bash permission checks not prompting for some compound commands that change directory before running git when the `cd` is wrapped or prefixed, as they do for a plain `cd`</li>
+<li>Fixed an `Edit(path)` deny rule not blocking a Bash redirect to that path in some commands that also held a subshell</li>
+<li>Fixed worktree-isolated sessions accepting some locale-prefixed commands the isolation guard should refuse</li>
+<li>Fixed worktree-isolated sessions on zsh accepting some arithmetic commands that the isolation guard should refuse</li>
+<li>Fixed worktrees and branch checkouts that Claude Code creates so they ignore git replace refs, as its other git operations already do</li>
+<li>Fixed profile store write protection not applying when the config directory is reached through a symlink</li>
+<li>Fixed sessions compacting repeatedly after reading files under a very large nested CLAUDE.md; a nested CLAUDE.md over the size limit now loads only its start</li>
+<li>Fixed ctrl+enter (send now) only queuing a message when pressed before the response had started, and restarting a prompt&#x27;s hooks while leaving the message queued when pressed while those hooks were running</li>
+<li>Fixed key-bound slash commands running in the shell from `!` mode</li>
+<li>Fixed ctrl+o not showing messages from other agents and sessions that are still waiting to be delivered; they now appear in full under the transcript, marked as waiting</li>
+<li>Fixed long tool output previews being cut through an emoji, leaving session transcripts that `jq` could not parse</li>
+<li>Fixed Read reporting &quot;File does not exist&quot; for PDF page ranges in Linux sandboxes that share the parent&#x27;s `/proc`</li>
+<li>Fixed messages from a Claude Desktop-hosted session sometimes being lost when its connection refreshed</li>
+<li>Fixed features missing from Claude Code sessions in the Claude desktop app when the terminal on the same computer was signed in to a different account or organization</li>
+<li>Fixed the `claude remote-control` status line showing `HEAD` as the branch for a folder that is not in a git repository</li>
+<li>Fixed split-pane agent teammates not inheriting the tool deny and `--tools` rules given on the leader&#x27;s command line</li>
+<li>Fixed sessions renamed with `/rename` appearing to other sessions under a generated name after a VS Code window reload or a non-interactive `--resume`</li>
+<li>Fixed the `/rewind` list showing &quot;No code changes&quot; for a turn that changed checkpointed files through `/code-review --fix`, a subagent or a shell command</li>
+<li>Fixed `/privacy-settings` showing an out-of-date &quot;Help improve our AI models&quot; value; it now also says when the setting can&#x27;t be fetched</li>
+<li>Fixed feedback saying &quot;try again later&quot; when your organization does not accept feedback; it now shows the server&#x27;s reason and where to report a bug</li>
+<li>Fixed oversized /feedback reports failing instead of being resent without the transcript</li>
+<li>Fixed a skill in an `--add-dir` folder being unreachable when another skill already held its name; it is now offered as `&lt;folder&gt;:&lt;name&gt;`</li>
+<li>Fixed `/verify` and `/code-review` not finding a nested package&#x27;s own skill when its files were changed from the shell</li>
+<li>Fixed the /claude-api skill saying that `ant beta:worker poll --on-work` passes trace context to the command</li>
+<li>Fixed the /claude-api skill&#x27;s C# tracing setup missing spans from the cloud platform clients</li>
+<li>Fixed the /claude-api skill saying that API spans for requests to Claude Platform on AWS can&#x27;t join the caller&#x27;s trace</li>
+<li>Fixed hooks that run in PowerShell not blocking when the hook&#x27;s program exits with code 2, and on Windows `PreToolUse` and `PermissionRequest` hooks with `&quot;shell&quot;: &quot;powershell&quot;` failing open when Git for Windows isn&#x27;t installed</li>
+<li>Fixed a mod&#x27;s `turn.step` hook that names a model by alias, such as `haiku`, failing every request with a model error: the alias now resolves to its model</li>
+<li>Fixed plugins and skills synced from claude.ai being removed, sometimes mid-session, after a disk read error</li>
+<li>Fixed artifact publishes and updates being refused for some ordinary pages, such as pages with certain minified scripts or artifacts Claude could not read first</li>
+<li>Fixed Claude asking for permission on each artifact update for the rest of a turn after the conversation was compacted in that turn</li>
+<li>Fixed fine-grained tool streaming staying off on Amazon Bedrock when `ANTHROPIC_BEDROCK_BASE_URL` is set to the default `bedrock-runtime.&lt;region&gt;.amazonaws.com` endpoint</li>
+<li>Fixed the &quot;Waiting for API response&quot; hint flickering behind gateways that send only keepalive pings: routes off Anthropic&#x27;s backend now wait 45 seconds</li>
+<li>Fixed Claude notifying unrelated GitHub users by writing role names and placeholders as mentions in PRs, issues and comments</li>
+<li>Linux: Fixed sandbox write denies lifting when a background command outlived the session</li>
+<li>Windows: Fixed PowerShell permission checks auto-approving some `Set-Location` or `cd` commands that target the current directory and carry extra arguments; these now prompt for approval</li>
+<li>macOS: Fixed the &quot;Install Command Line Developer Tools&quot; dialog opening each time Claude Code starts on a Mac without Xcode or the Command Line Tools</li>
+<li>Self-hosted runner: Fixed `--startup-timeout-min` stopping a session whose first prompt, such as `/code-review`, was still working in a subagent; a frozen process is still stopped</li>
+<li>Improved the speed of many git commands Claude Code runs for itself on Windows; on every platform, errors from those commands now show in English even when git is set to another language</li>
+<li>Improved the error when a hooks module is nested too deep to load: it now names the file instead of showing a bare stack-overflow message</li>
+<li>Improved disk-full handling: a Bash command cut off by a full disk now says so and names the folder to free up, and starting on a full temp volume prints a clear message, not a raw ENOSPC error</li>
+<li>Improved the /claude-api skill to offer API tracing alongside SDK tracing when asked to add OpenTelemetry</li>
+<li>Improved the /claude-api skill to check the live docs before saying a feature is unsupported</li>
+<li>Self-hosted runner: Improved sessions that move to a new runner: Claude now sees the tool call that was interrupted, marked as outcome unknown</li>
+<li>Updated the bundled dataviz skill to accept APCA as a text-contrast measure (keeping WCAG 2 ratios where AA conformance is required), add an `apca(text, background)` function to its palette validator scripts, and say whether a label inside a colored chart fill should be white or near-black</li>
+<li>Updated the /claude-api skill: service account keys and Workload Identity Federation tokens can now manage OpenTelemetry destinations</li>
+<li>Changed `sed -i` to get the standard Bash prompt and run as written, not a simulated file-edit preview; like other Bash edits, it is no longer restored by `/rewind`</li>
+<li>Changed `claude ultrareview` to require workspace trust: it asks on a terminal, else refuses; scripts pass `--trust-workspace`, which takes no value (put a PR number or base branch before it), or set `CLAUDE_CODE_DISABLE_ULTRAREVIEW_TRUST_CHECK=1`</li>
+<li>Changed the dangerous `rm` and `rmdir` prompt in bypass permissions mode in the Desktop app and VS Code to deny the command at once with a rewrite hint, so unattended sessions keep going</li>
+<li>Changed commands the settings exclude from the sandbox to ask before writing to its write-list paths while the sandbox is enabled but cannot run; the unsandboxed fallback is refused there</li>
+<li>Changed worktree creation and reuse so git no longer fetches objects on demand, in ordinary clones and in partial clones with a Bash sandbox configured; such a partial clone fetches them first</li>
+<li>Changed the `/claude-api` skill to build Managed Agents subagent teams on `multiagent_20261001` with dynamic workflows on by default, instead of `coordinator`</li>
+<li>[VSCode] Added a log warning that says what to do when dictation or the extension&#x27;s own requests fail certificate verification, such as behind a TLS-inspecting proxy</li>
+<li>[VSCode] Fixed the Claude panel staying blank after the editor cached an incomplete copy of its files; it now recovers by itself, or says what went wrong and how to fix it</li>
+<li>[VSCode] Fixed Session history filling up with empty &quot;Untitled&quot; sessions each time you start a new session without sending a message</li>
+<li>[VSCode] Fixed long slash-command messages such as `/goal` filling the chat panel; they now fold behind Show more like other prompts (anthropics/claude-code#97469)</li>
+<li>[VSCode] Fixed long messages not folding behind Show more after the chat panel is made narrower</li>
+<li>[VSCode] Fixed Ctrl+J in the chat input always inserting a newline: it is now left to VS Code and the OS when &quot;ctrl+j&quot; is set to null in the Chat context of ~/.claude/keybindings.json</li>
+<li>[VSCode] Fixed a mod&#x27;s &quot;From the … plugin&quot; label above the prompt being drawn over the slash command and @-mention menus (anthropics/claude-code#102981)</li>
+<li>[VSCode] Fixed an empty list item, paragraph or code block, and list items renumbered from 1, when pasting copied LaTeX math</li>
+<li>[VSCode] Fixed the feedback error showing only an HTTP status when your organization does not accept feedback</li>
+<li>[VSCode] Improved Edit and Write speed in the chat panel: the wait for new problems after each edit is now 0.75 seconds in most cases, down from 1 to 1.5 seconds</li>
+<li>[Cloud sessions] Fixed the Add connector list in routine forms saying no connectors were available while they were still loading</li>
+<li>[Cloud sessions] Fixed the cloud environment editor shuffling environment variables and adding backslashes to values that contain both kinds of quote</li>
+<li>[Cloud sessions] Fixed the self-hosted environment details dialog in admin settings so its title, tabs and buttons stay in view while only the content scrolls</li>
+<li>[Cloud sessions] Fixed the &quot;read documentation&quot; tool row in cloud sessions, which showed escaped JSON instead of a readable page</li>
+<li>[Cloud sessions] Improved a cloud session&#x27;s Changes pane, which now says when it lists only pushed commits or only Claude&#x27;s edits</li>
+<li>[Claude Tag] Fixed Claude in Slack posting a draft you approved for a channel into your DM by mistake; a post with no channel is now refused so it can go to the approved channel</li>
+<li>[Claude Tag] Fixed Allow and Deny on Claude&#x27;s approval cards in Slack doing nothing when the session had stopped; your answer now restarts the session</li>
+<li>[Claude Tag] Fixed Claude ignoring untagged messages in a Slack channel after its workspace moved to a different Claude organization, including unshared channels on Enterprise Grid</li>
+<li>[Claude Tag] Fixed Claude in a Slack channel posting a threaded reply before reading a newer message someone had just added to that thread</li>
+<li>[Claude Tag] Fixed the Slack page in Claude Tag admin settings saying no workspaces were connected when the list failed to load; it now shows an error with a Retry button</li>
+<li>[Code Review] Fixed a finished review showing no check on the pull request when earlier tries to create it failed; a final try now adds a completed check</li>
+<li>[Code Review] Fixed a push queued behind a running review still starting a review after `@claude review stop`; its check now closes and says why</li></ul></details>
+</article>
+<article>
+<h2>v2.1.308 <span class="date">2026-10-22</span></h2>
 <div class="summary">【概要】
 安定性を高める不具合修正と信頼性の改善が行われた。
 
@@ -6512,20 +6687,6 @@ macOS 12での起動不可と、リモート・自動実行セッションが途
 <li>Removed syntax highlighting for six rarely used languages (1c, gml, isbl, mathematica, maxima, sqf); the binary is 2.5 MB smaller</li>
 <li>[VSCode] Fixed the sign-in screen&#x27;s &quot;Bedrock, Foundry, or Vertex&quot; button opening the docs at the top of the page instead of the third-party provider setup section</li>
 <li>[VSCode] Changed the Remote Control banner to a footer pill (shown while Remote Control is on or has failed) that opens the session on claude.ai/code; turn it on or off with `/remote-control`</li></ul></details>
-</article>
-<article>
-<h2>v2.1.250 <span class="date">2026-08-28</span></h2>
-<div class="summary">【概要】
-不具合修正と動作の安定性向上を中心とした更新です。
-
-【重要】
-- 特になし
-
-【詳細】
-
-■ 修正
-- 全般的な不具合を修正し、動作の安定性を高めました。</div>
-<details><summary>原文リリースノート (1件)</summary><ul><li>Bug fixes and reliability improvements</li></ul></details>
 </article>
 </main>
 </body>
