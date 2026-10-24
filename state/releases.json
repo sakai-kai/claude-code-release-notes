@@ -1,6 +1,39 @@
 {
-  "last_version": "2.1.309",
+  "last_version": "2.1.310",
   "releases": [
+    {
+      "version": "2.1.310",
+      "notes": [
+        "Added the Monitor tool and plugin monitors on Bedrock, Vertex, and Foundry, and when telemetry or nonessential traffic is disabled; long foreground sleeps are now blocked there too",
+        "Fixed requests failing behind some gateways and compatible servers that reject the `effort-2025-11-24` beta value or mid-conversation system messages; Claude Code now retries without them",
+        "Fixed background cleanup deleting some recent files, such as pasted images, when `cleanupPeriodDays` is set to a very large value",
+        "Fixed compaction after a \"Prompt is too long\" error keeping too much of a conversation with dense text, such as base64 or SVG, so the next request could fail again",
+        "Fixed file read permission prompts not showing where a symbolic link leads",
+        "Fixed a question's auto-continue timeout firing the moment the external editor closed after a long edit",
+        "Windows: Fixed PreToolUse and PermissionRequest hooks letting a tool call through when Git Bash is missing and the hook's command is only quoted strings, such as a quoted path",
+        "Improved auto mode's prompt before the first read outside the working directories: it now says when blocking those reads makes shell commands ask for permission",
+        "Improved memory use of non-interactive sessions (`-p`, Agent SDK) during compaction when the transcript file is very large",
+        "Improved a mod's `Image` to draw inside tmux with `allow-passthrough` and `focus-events` on, in kitty, Ghostty, and iTerm2 3.5+ with fullscreen rendering, where it showed only its `alt` text",
+        "Linux: Improved `/sandbox` and the sandbox startup warning to name Ubuntu's AppArmor restriction on user namespaces, and how to lift it, when it keeps bubblewrap from starting the sandbox",
+        "Changed the error for an MCP tool call that times out in a non-interactive session while the server's elicitation is unanswered: it now tells Claude that no answer came and not to repeat the call",
+        "[VSCode] Fixed pressing Enter on the plan review card's \"Send feedback and keep planning\" button approving the plan instead of sending your comments back",
+        "[VSCode] Fixed the panel showing \"Something went wrong\" after \"Switch branch & continue\" on a cloud session opened from Session history's Web tab",
+        "[Cloud sessions] Added Claude Code cloud sessions and Remote Control permissions to Enterprise custom roles, so Owners can control access to each by role",
+        "[Cloud sessions] Added a Choose file button to load a cloud environment's setup script from a file",
+        "[Cloud sessions] Fixed failed saves and archives in the cloud environment edit dialog showing no error inside the dialog",
+        "[Cloud sessions] Fixed failed routine API token actions showing only a toast; the error now appears in the routine edit dialog",
+        "[Cloud sessions] Improved the session start checklist to show a cloud environment's setup script output in a scrolling box",
+        "[Cloud sessions] Changed turning on Cloud sessions or Remote Control in admin settings to ask for confirmation and list the custom roles that have that permission",
+        "[Cloud sessions] Changed the cloud environment dialog to open network access, setup script and environment variables from rows instead of listing every editor at once",
+        "[Claude Tag] Fixed Claude Tag treating `!` commands such as `!restart` and `!help` as ordinary messages when sent in bold, italic or strikethrough",
+        "[Claude Tag] Fixed Claude Tag admin channel and workspace pages being replaced by a load error when a background refresh of the bundle list fails",
+        "[Claude Tag] Fixed Claude Tag's spend limits page in admin settings reporting that no channels match a filter while channel names are still loading",
+        "[Code Review] Fixed the Code Review admin section hiding its repositories and switches after a failed refresh of the repository list",
+        "[Code Review] Improved the Code Review admin section to retry the first load and show one Try again banner when it still fails"
+      ],
+      "summary_ja": "【概要】\nBedrock等でもMonitorツールが使えるようになり、各種の接続失敗や誤動作の修正が入った。\n\n【重要】\n- Bedrock、Vertex、Foundryを使う場合や、テレメトリ(=利用状況の送信)を無効にしている場合でも、Monitorツールとプラグインのモニターが使えるようになった。あわせて、長い待機(sleep)をその場で実行し続ける指示はブロックされる (影響: Bedrock、Vertex、Foundryの利用者、またはテレメトリを無効にしている人)\n- 一部の接続先(ゲートウェイ=社内などの中継サーバーや互換サーバー)がリクエスト内の特定の項目を拒否して失敗していた問題が直り、その項目を外して自動的に再試行するようになった (影響: 社内の中継サーバーや互換サーバー経由で Claude Code を使っている人)\n- `cleanupPeriodDays`(=古いファイルを自動削除するまでの日数)を非常に大きな値にしていると、貼り付けた画像など最近のファイルまで消えることがあった問題を修正した (影響: `cleanupPeriodDays` を大きな値に設定している人)\n\n【詳細】\n■ 新機能\n- Bedrock、Vertex、Foundryでの利用時と、テレメトリや必須でない通信を無効にしている場合にも、Monitorツールとプラグインのモニターが使えるようになり、長い待機(sleep)をその場で実行し続ける指示もブロックされるようになった\n- [クラウドセッション] Enterprise向けのカスタムロール(=権限をまとめた役割)に、Claude Codeのクラウドセッションとリモート操作(Remote Control)の権限を追加し、オーナーが役割ごとにアクセスを管理できるようにした\n- [クラウドセッション] クラウド環境のセットアップスクリプトを、「ファイルを選択」ボタンでファイルから読み込めるようにした\n\n■ 修正\n- 一部の中継サーバーや互換サーバーが `effort-2025-11-24` というベータ値や会話途中のシステムメッセージを拒否してリクエストが失敗する問題を修正し、それらを外して自動的に再試行するようにした\n- `cleanupPeriodDays` を非常に大きな値にしていると、バックグラウンドの掃除で貼り付けた画像など最近のファイルが削除されることがある問題を修正した\n- 「Prompt is too long」エラーの後の会話の圧縮(=要約して短くする処理)で、base64やSVGのような文字がぎっしり詰まった内容が多く残りすぎ、次のリクエストがまた失敗することがある問題を修正した\n- ファイル読み取りの許可確認で、ショートカットのように別の場所を指すファイル(シンボリックリンク)の実際の指し先が表示されない問題を修正した\n- 質問の自動続行までのタイムアウトが、長時間の編集を終えて外部エディタを閉じた瞬間に発動してしまう問題を修正した\n- Windows: Git Bashが入っていない環境で、フック(=ツール実行の前後に動かす自動処理)のコマンドが引用符で囲んだパスなど文字列だけの場合に、PreToolUseとPermissionRequestのフックが確認なしにツール実行を通してしまう問題を修正した\n- [VSCode] プラン確認カードで「Send feedback and keep planning」ボタンをEnterで押すと、コメントが送られずにプランが承認されてしまう問題を修正した\n- [VSCode] ウェブ版のセッション履歴から開いたクラウドセッションで「Switch branch & continue」を押すと、パネルに「Something went wrong」と表示される問題を修正した\n- [クラウドセッション] クラウド環境の編集ダイアログで、保存やアーカイブに失敗してもダイアログ内にエラーが出ない問題を修正した\n- [クラウドセッション] ルーティンのAPIトークン操作に失敗したとき、一時的な通知しか出なかった問題を修正し、ルーティンの編集ダイアログ内にエラーを表示するようにした\n- [Claude Tag] `!restart` や `!help` などの `!` コマンドを太字・斜体・取り消し線で送ると、通常のメッセージとして扱われてしまう問題を修正した\n- [Claude Tag] 管理画面のチャンネル・ワークスペースのページで、バックグラウンドでの一覧の再読み込みに失敗すると、ページ全体が読み込みエラー表示に置き換わってしまう問題を修正した\n- [Claude Tag] 管理画面の支出上限ページで、チャンネル名の読み込み中に、絞り込みに合うチャンネルがないと表示される問題を修正した\n- [コードレビュー] 管理画面のコードレビュー欄で、リポジトリ一覧の再読み込みに失敗すると、リポジトリとスイッチが非表示になる問題を修正した\n\n■ 変更\n- 作業ディレクトリ外を初めて読み取る前の自動モードの確認メッセージを改善し、それらの読み取りを止めるとシェルコマンドの実行で許可確認が出るようになる場合は、その旨を表示するようにした\n- 非対話モード(`-p`、Agent SDK)で、会話の記録ファイルが非常に大きいときの圧縮中のメモリ使用量を改善した\n- 拡張機能(mod)の `Image` が、tmux(`allow-passthrough` と `focus-events` が有効な場合)や、フルスクリーン表示のkitty、Ghostty、iTerm2 3.5以降で、代替テキスト(`alt`)しか表示されなかった問題を改善し、画像が描画されるようにした\n- Linux: `/sandbox` と起動時の警告で、UbuntuのAppArmorによるユーザー名前空間(=隔離された実行環境を作る仕組み)の制限が原因でサンドボックスを起動できない場合に、そのことと解除方法を表示するようにした\n- 非対話モードでMCPツールの呼び出しがタイムアウトし、サーバーからの確認要求(elicitation)に回答がなかった場合のエラーを、「回答が得られなかったので同じ呼び出しを繰り返さないように」とClaudeに伝える内容に変更した\n- [クラウドセッション] セッション開始時のチェックリストで、クラウド環境のセットアップスクリプトの出力をスクロールできる枠内に表示するよう改善した\n- [クラウドセッション] 管理画面でクラウドセッションまたはリモート操作を有効にする際、確認を求め、その権限を持つカスタムロールを一覧表示するようにした\n- [クラウドセッション] クラウド環境のダイアログを、ネットワークアクセス、セットアップスクリプト、環境変数をすべて同時に並べる形から、行を選んで開く形に変更した\n- [コードレビュー] 管理画面のコードレビュー欄で、最初の読み込みを自動で再試行し、それでも失敗した場合は「Try again」のバナーを1つだけ表示するよう改善した",
+      "detected_at": "2026-10-24T00:05:08+00:00"
+    },
     {
       "version": "2.1.309",
       "notes": [
